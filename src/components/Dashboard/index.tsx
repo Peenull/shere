@@ -28,7 +28,7 @@ const MiniStatCard = ({ icon, title, value, isLoading, color }: { icon: React.Re
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
-  const { totalBalance, totalInvites, sharePercentage, loading } = useUserData();
+  const { totalBalance, totalInvites, share, loading } = useUserData();
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   
   const shareText = "Join me on Shere and start earning! Use my link to sign up.";
@@ -93,13 +93,13 @@ export default function Dashboard() {
           <MiniStatCard 
             icon={<PieChart size={24} className="text-yellow-400" />} 
             title="Your Share" 
-            value={`${sharePercentage}%`}
+            value={`${share}%`}
             isLoading={loading} 
             color="bg-yellow-500/10"
           />
         
-          {!loading && sharePercentage < 50 && (
-            <BuyShares currentShare={sharePercentage} />
+          {!loading && share < 50 && (
+            <BuyShares currentShare={share} />
           )}
         </div>
 

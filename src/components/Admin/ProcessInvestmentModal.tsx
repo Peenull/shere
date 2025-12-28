@@ -1,4 +1,4 @@
-''''use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { UserData } from '@/hooks/useAdminData';
@@ -120,4 +120,3 @@ export default function ProcessInvestmentModal({ isOpen, user, onClose, onSave, 
     </div>
   );
 }
-''''

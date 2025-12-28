@@ -1,10 +1,10 @@
-'use client';
+''''use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth'; // Import deleteUser
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'; // Import serverTimestamp
 import { auth, db } from '../../../lib/firebase';
 import { useDirector } from '@/components/Director';
 import { formatFirebaseError } from '../../../lib/firebaseErrors';
@@ -75,30 +75,45 @@ export default function Signup() {
     }
 
     setIsLoading(true);
+    let userCredential;
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      // Step 1: Create the authentication user
+      userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        country: formData.country,
-        currency: formData.currency,
-        language: formData.language,
-        referredBy: formData.referredBy,
-        createdAt: new Date(),
-        invited: [],
-        balance: 0,
-        share: 0,
-      });
+      // Step 2: Attempt to create the Firestore document
+      try {
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          country: formData.country,
+          currency: formData.currency,
+          language: formData.language,
+          referredBy: formData.referredBy,
+          createdAt: serverTimestamp(), // Use server timestamp for accuracy
+          invited: [],
+          balance: 0,
+          share: 0,
+        });
+      } catch (dbError: any) {
+        // If Firestore write fails, roll back auth user creation
+        notify('Failed to save user data. Rolling back...', false);
+        if (user) {
+            await deleteUser(user);
+        }
+        throw dbError; // Re-throw the error to be caught by the outer catch block
+      }
 
       notify('Account created successfully! Redirecting...', true);
       router.push('/');
+
     } catch (error: any) {
-      notify(formatFirebaseError(error.code), false);
+        // Catches both auth and Firestore errors
+        const friendlyError = formatFirebaseError(error.code || 'SIGNUP_FAILED');
+        notify(friendlyError, false);
     } finally {
       setIsLoading(false);
     }
@@ -206,3 +221,4 @@ export default function Signup() {
     </div>
   );
 }
+''''

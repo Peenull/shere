@@ -1,4 +1,4 @@
-''''use client';
+'use client';
 
 import React from 'react';
 import { X, User, DollarSign, Percent, Calendar, Users, Trash2 } from 'react-feather';
@@ -106,4 +106,3 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({ isOpen, user, onClose, on
 };
 
 export default ViewUserModal;
-''''

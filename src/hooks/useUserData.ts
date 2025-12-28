@@ -10,7 +10,7 @@ export const useUserData = () => {
   const [userData, setUserData] = useState({
     totalBalance: 0,
     totalInvites: 0,
-    sharePercentage: 0,
+    share: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +31,7 @@ export const useUserData = () => {
         setUserData({
           totalBalance: data.totalBalance || 0,
           totalInvites: data.totalInvites || 0,
-          sharePercentage: data.sharePercentage || 0,
+          share: data.share || 0,
         });
       } else {
         // If the document doesn't exist, set default values
@@ -39,7 +39,7 @@ export const useUserData = () => {
         setUserData({
           totalBalance: 0,
           totalInvites: 0,
-          sharePercentage: 0,
+          share: 0,
         });
       }
       setLoading(false);
