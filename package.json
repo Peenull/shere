@@ -9,9 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "firestore": "^1.1.6",
     "next": "16.1.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-firebase-hooks": "^5.1.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
