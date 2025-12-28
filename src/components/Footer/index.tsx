@@ -1,0 +1,62 @@
+'use client';
+
+import React from 'react';
+import { Globe, Mail, Phone, Twitter, Facebook, Linkedin } from 'react-feather';
+
+export default function Footer() {
+  return (
+    <footer className="bg-slate-950/50 border-t border-gray-800/50 text-gray-400">
+      <div className="max-w-7xl mx-auto py-12 px-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* About Shere */}
+          <div className="col-span-1 md:col-span-2">
+            <h3 className="text-2xl font-black text-yellow-400 italic mb-4">SHERE.</h3>
+            <p className="max-w-md">
+              Building a community of earners across Africa. We believe in the power of networks to create financial opportunities for everyone.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-bold text-white tracking-wider uppercase mb-4">Links</h4>
+            <ul className="space-y-2">
+              <li><a href="#" className="hover:text-yellow-400 transition-colors">How It Works</a></li>
+              <li><a href="/about" className="hover:text-yellow-400 transition-colors">About Us</a></li>
+              <li><a href="/signup" className="hover:text-yellow-400 transition-colors">Join Now</a></li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-bold text-white tracking-wider uppercase mb-4">Contact</h4>
+            <ul className="space-y-3">
+              <li className="flex items-center">
+                <Mail size={16} className="mr-3 text-yellow-400" />
+                <span>support@shere.app</span>
+              </li>
+              <li className="flex items-center">
+                <Phone size={16} className="mr-3 text-yellow-400" />
+                <span>+237 6XX XXX XXX</span>
+              </li>
+              <li className="flex items-center">
+                <Globe size={16} className="mr-3 text-yellow-400" />
+                <span>Douala, Cameroon</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-10 pt-8 border-t border-gray-800/50 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-sm text-gray-500">
+            © {new Date().getFullYear()} Shere.app - All Rights Reserved.
+          </p>
+          <div className="flex space-x-4 mt-4 md:mt-0">
+            <a href="#" className="text-gray-500 hover:text-yellow-400 transition-colors"><Twitter /></a>
+            <a href="#" className="text-gray-500 hover:text-yellow-400 transition-colors"><Facebook /></a>
+            <a href="#" className="text-gray-500 hover:text-yellow-400 transition-colors"><Linkedin /></a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

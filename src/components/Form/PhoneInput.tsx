@@ -1,94 +1,87 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { COUNTRIES, Country } from './countries';
 
-type Country = {
-  code: string;
-  name: string;
-  dialCode: string;
-  expectedLength?: number;
-};
+function stripToDigits(str: string): string {
+  return str.replace(/\D/g, '');
+}
 
-// expectedLength = national significant number length (digits after country code)
-const COUNTRIES: Country[] = [
-  { code: "US", name: "United States", dialCode: "1", expectedLength: 10 },
-  { code: "GB", name: "United Kingdom", dialCode: "44", expectedLength: 10 },
-  { code: "CA", name: "Canada", dialCode: "1", expectedLength: 10 },
-  { code: "DE", name: "Germany", dialCode: "49", expectedLength: 10 },
-  { code: "FR", name: "France", dialCode: "33", expectedLength: 9 },
-  { code: "NG", name: "Nigeria", dialCode: "234", expectedLength: 10 },
-];
+function findCountry(dialCode: string): Country | undefined {
+  if (!dialCode) return undefined;
+  return COUNTRIES.find((c) => c.dialCode === dialCode);
+}
 
-type Props = {
+function findCountryByPhone(phone: string): Country {
+  const digits = stripToDigits(phone);
+  if (!digits) return COUNTRIES[0];
+
+  let bestMatch = COUNTRIES[0];
+  for (const country of COUNTRIES) {
+    if (digits.startsWith(country.dialCode)) {
+      if (country.dialCode.length > bestMatch.dialCode.length) {
+        bestMatch = country;
+      }
+    }
+  }
+  return bestMatch;
+}
+
+interface PhoneInputProps {
+  label: string;
   value?: string;
-  onChange?: (value: string) => void;
-  label?: string;
+  onChange?: (phone: string, country: string, currency: string) => void;
+  className?: string;
   required?: boolean;
-  placeholder?: string;
-};
-
-function stripToDigits(s = "") {
-  return s.replace(/\D+/g, "");
 }
 
 export default function PhoneInput({
-  value,
-  onChange,
   label,
+  value = '',
+  onChange,
+  className,
   required,
-  placeholder,
-}: Props) {
-  const [country, setCountry] = useState<Country>(COUNTRIES[0]);
-  const [local, setLocal] = useState("");
+}: PhoneInputProps) {
+  const [country, setCountry] = useState<Country>(() => findCountryByPhone(value));
+  const [local, setLocal] = useState<string>(() =>
+    value ? stripToDigits(value).substring(country.dialCode.length) : ''
+  );
   const [error, setError] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  function limitToExpected(digits: string, c: Country) {
-    if (c.expectedLength == null) return digits;
-    return digits.slice(0, c.expectedLength);
-  }
-
-  function validateLocal(cleaned: string, c: Country) {
-    if (c.expectedLength == null) {
-      setError(null);
-      return;
-    }
-    if (cleaned.length === 0) {
-      setError(null);
-    } else if (cleaned.length !== c.expectedLength) {
-      setError(`Phone must be ${c.expectedLength} digits`);
-    } else {
-      setError(null);
-    }
-  }
+  const selectedCountry = useMemo(() => findCountry(country.dialCode) || COUNTRIES[0], [country]);
 
   useEffect(() => {
-    if (!value) {
-      setLocal("");
-      setError(null);
-      return;
-    }
-    // try to parse +{dial}{rest}
-    const digits = stripToDigits(value);
-    // find best matching country by dialCode prefix
-    const match = COUNTRIES.slice()
-      .sort((a, b) => b.dialCode.length - a.dialCode.length)
-      .find((c) => digits.startsWith(c.dialCode));
-    if (match) {
-      const localDigits = digits.slice(match.dialCode.length);
-      const limited = limitToExpected(localDigits, match);
-      setCountry(match);
-      setLocal(limited);
-      validateLocal(limited, match);
-    } else {
-      setLocal(digits);
-      setError(null);
-    }
-  }, [value]);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  function handleCountrySelect(newCountry: Country) {
+    setCountry(newCountry);
+    setDropdownOpen(false);
+    emitChange(local, newCountry);
+  }
+
+  function handleLocalChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const nextLocal = stripToDigits(e.target.value);
+    setLocal(nextLocal);
+    emitChange(nextLocal, country);
+  }
 
   function emitChange(nextLocal: string, nextCountry = country) {
     const cleaned = stripToDigits(nextLocal);
-    const final = cleaned ? `+${nextCountry.dialCode}${cleaned}` : "";
-    // validate exact length when expectedLength is known
+    const finalPhone = cleaned ? `+${nextCountry.dialCode}${cleaned}` : '';
+    const finalCountryName = nextCountry.name;
+    const finalCurrency = nextCountry.currency;
+
     if (nextCountry.expectedLength != null) {
       if (cleaned.length === 0) {
         setError(null);
@@ -99,71 +92,56 @@ export default function PhoneInput({
       }
     }
 
-    onChange?.(final);
+    onChange?.(finalPhone, finalCountryName, finalCurrency);
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      {label ? (
-        <label className="font-semibold text-sm text-gray-200">
-          {label} {required ? <span className="text-red-400">*</span> : null}
-        </label>
-      ) : null}
-      <div className="flex gap-2">
-        <select
-          value={country.code}
-          onChange={(e) => {
-            const next =
-              COUNTRIES.find((c) => c.code === e.target.value) ?? COUNTRIES[0];
-            // when switching country, trim/limit local to the new expected length
-            const limited = limitToExpected(local, next);
-            setCountry(next);
-            setLocal(limited);
-            emitChange(limited, next);
-          }}
-          className="px-3 py-2 rounded-md border border-[#334155] bg-[#0b1220] text-gray-100 text-sm"
-        >
-          {COUNTRIES.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.name} (+{c.dialCode})
-            </option>
-          ))}
-        </select>
-        <input
-          type="tel"
-          inputMode="tel"
-          placeholder={placeholder ?? "Phone number"}
-          value={local}
-          onChange={(e) => {
-            const cleaned = stripToDigits(e.target.value);
-            const limited = limitToExpected(cleaned, country);
-            setLocal(limited);
-            emitChange(limited);
-          }}
-          onPaste={(e) => {
-            const txt = (
-              e.clipboardData || (window as any).clipboardData
-            ).getData("text");
-            const cleaned = stripToDigits(txt);
-            const limited = limitToExpected(cleaned, country);
-            e.preventDefault();
-            setLocal(limited);
-            emitChange(limited);
-          }}
-          className={`flex-1 px-3 py-2 rounded-md text-sm bg-[#0b1220] text-gray-100 ${
-            error ? "border border-red-400" : "border border-[#334155]"
-          }`}
-          maxLength={country.expectedLength ?? undefined}
-        />
+    <div className="w-full">
+      <label className="block text-sm font-medium text-gray-400 mb-2">
+        {label} {required && <span className="text-red-400">*</span>}
+      </label>
+      <div className="flex items-center">
+        <div ref={dropdownRef} className="relative">
+          <button
+            type="button"
+            className={`${className} flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 rounded-l-lg`}
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+          >
+            <span>{selectedCountry.emoji}</span>
+          </button>
+          {dropdownOpen && (
+            <div className="absolute z-20 w-64 bg-slate-800 rounded-lg shadow-lg max-h-60 overflow-y-auto mt-2">
+              {COUNTRIES.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-700 text-left"
+                  onClick={() => handleCountrySelect(c)}
+                >
+                  <span>
+                    {c.emoji} {c.name}
+                  </span>
+                  <span className="text-gray-400">+{c.dialCode}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="relative w-full">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+            +{country.dialCode}
+          </div>
+          <input
+            type="tel"
+            value={local}
+            onChange={handleLocalChange}
+            placeholder={selectedCountry.placeholder || ''}
+            className={`${className} rounded-l-none rounded-r-lg pl-14`}
+          />
+        </div>
       </div>
-      <div className={`text-sm ${error ? "text-red-400" : "text-gray-400"}`}>
-        {error
-          ? error
-          : country.expectedLength
-          ? `Expect ${country.expectedLength} digits`
-          : ""}
-      </div>
-      <div className="text-sm text-gray-400">Value: {value ?? ""}</div>
+      {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
     </div>
   );
 }
