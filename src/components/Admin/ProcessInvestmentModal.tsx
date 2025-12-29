@@ -20,6 +20,7 @@ export default function ProcessInvestmentModal({ isOpen, user, onClose, onSave, 
   const [calculatedShare, setCalculatedShare] = useState(0);
   const [error, setError] = useState('');
 
+
   useEffect(() => {
     if (!user) return;
     const numericAmount = Number(amount);

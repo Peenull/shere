@@ -8,8 +8,8 @@ import { db } from '@/../lib/firebase'; // Adjust the import path as necessary
 export const useUserData = () => {
   const { user } = useAuth();
   const [userData, setUserData] = useState({
-    totalBalance: 0,
-    totalInvites: 0,
+    balance: 0,
+    invited: [],
     share: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -29,16 +29,16 @@ export const useUserData = () => {
         // If the document exists, update the state
         const data = snapshot.data();
         setUserData({
-          totalBalance: data.totalBalance || 0,
-          totalInvites: data.totalInvites || 0,
+          balance: data.balance || 0,
+          invited: data.invited || [],
           share: data.share || 0,
         });
       } else {
         // If the document doesn't exist, set default values
         // You might want to create the document here on user creation
         setUserData({
-          totalBalance: 0,
-          totalInvites: 0,
+          balance: 0,
+          invited: [],
           share: 0,
         });
       }

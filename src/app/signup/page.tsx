@@ -1,9 +1,9 @@
-''''use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { createUserWithEmailAndPassword, deleteUser } from 'firebase/auth'; // Import deleteUser
+import { createUserWithEmailAndPassword, deleteUser, updateProfile } from 'firebase/auth'; // Import deleteUser
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'; // Import serverTimestamp
 import { auth, db } from '../../../lib/firebase';
 import { useDirector } from '@/components/Director';
@@ -81,6 +81,7 @@ export default function Signup() {
       // Step 1: Create the authentication user
       userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
+      await updateProfile(user, { displayName: formData.name });
 
       // Step 2: Attempt to create the Firestore document
       try {
@@ -98,6 +99,36 @@ export default function Signup() {
           balance: 0,
           share: 0,
         });
+
+        // Step 3: Update referrer's invited list
+        if (formData.referredBy) {
+            try {
+              const authToken = await user.getIdToken();
+              const response = await fetch('/api/updateReferral', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  newUserId: user.uid,
+                  referredById: formData.referredBy,
+                  authToken,
+                }),
+              });
+    
+              if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to update referral');
+              }
+    
+              console.log("Successfully updated referrer's invited list.");
+    
+            } catch (error: any) {
+              console.error("Error updating referral:", error);
+              notify(`Account created, but referral update failed: ${error.message}`, false);
+            }
+          }
+
       } catch (dbError: any) {
         // If Firestore write fails, roll back auth user creation
         notify('Failed to save user data. Rolling back...', false);
@@ -221,4 +252,3 @@ export default function Signup() {
     </div>
   );
 }
-''''

@@ -36,7 +36,7 @@ export default function Header() {
           ) : user ? (
             <>
               <li>
-                <span className="text-gray-400">Welcome, {user.name}</span>
+                <span className="text-gray-400">Welcome, {user.displayName}</span>
               </li>
               <li>
                 <button

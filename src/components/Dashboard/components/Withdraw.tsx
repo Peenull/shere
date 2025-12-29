@@ -5,11 +5,11 @@ import { useDirector } from '@/components/Director';
 import { ArrowDownCircle } from 'react-feather';
 
 interface WithdrawProps {
-  totalBalance: number;
+  balance: number;
   loading: boolean;
 }
 
-export default function Withdraw({ totalBalance, loading }: WithdrawProps) {
+export default function Withdraw({ balance, loading }: WithdrawProps) {
   const { user } = useAuth();
   const { prompt, notify } = useDirector();
 
@@ -26,7 +26,7 @@ export default function Withdraw({ totalBalance, loading }: WithdrawProps) {
 
     if (amount && !isNaN(Number(amount))) {
       const numericAmount = Number(amount);
-      if (numericAmount > totalBalance) {
+      if (numericAmount > balance) {
         notify("You don't have enough balance for this withdrawal.", false);
         return;
       }
@@ -37,7 +37,7 @@ export default function Withdraw({ totalBalance, loading }: WithdrawProps) {
       });
 
       if (confirmation) {
-        const whatsappMessage = `Hello, I would like to withdraw ${numericAmount.toLocaleString()} FCFA from my Shere account.\n\nUser: ${user.displayName || 'N/A'}\nUserID: ${user.uid}`;
+        const whatsappMessage = `Hello, I would like to withdraw ${numericAmount.toLocaleString()} FCFA from my Shere account.\n\nUserID: ${user.uid}`;
         const whatsappUrl = `https://wa.me/237676736946?text=${encodeURIComponent(whatsappMessage)}`;
         window.open(whatsappUrl, '_blank');
         notify('Redirecting to WhatsApp to complete your request...', true);

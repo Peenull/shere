@@ -13,7 +13,7 @@ import { db } from '../../../lib/firebase';
 const SHARE_COST = 200; // 1% share costs 200 FCFA
 
 const AdminDashboard = () => {
-  const { users, loading, error, searchUsers, addUser, deleteUser, refreshUsers } = useAdminData();
+  const { users, loading, error, searchUsers, addUser, deleteUser } = useAdminData();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchBy, setSearchBy] = useState<'name' | 'uid'>('uid');
   const [hasSearched, setHasSearched] = useState(false);
@@ -25,6 +25,12 @@ const AdminDashboard = () => {
   
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [isProcessingInvestment, setIsProcessingInvestment] = useState(false);
+
+  const refreshData = () => {
+    if (hasSearched) {
+      searchUsers(searchTerm, searchBy);
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,14 +65,12 @@ const AdminDashboard = () => {
 
         const investorData = investorDoc.data() as UserData;
 
-        // 1. Calculate new share for the investor
         const newSharePercentage = investmentAmount / SHARE_COST;
         const updatedShare = (investorData.share || 0) + newSharePercentage;
 
         const batch = writeBatch(db);
         batch.update(investorRef, { share: updatedShare });
 
-        // 2. Check for a referrer and calculate commission
         if (investorData.referredBy) {
             const referrerRef = doc(db, "users", investorData.referredBy);
             const referrerDoc = await getDoc(referrerRef);
@@ -74,18 +78,16 @@ const AdminDashboard = () => {
             if (referrerDoc.exists()) {
                 const referrerData = referrerDoc.data() as UserData;
                 const commission = investmentAmount * ((referrerData.share || 0) / 100);
-                
                 const updatedBalance = (referrerData.balance || 0) + commission;
                 batch.update(referrerRef, { balance: updatedBalance });
             }
         }
 
-        // 3. Atomically commit both updates
         await batch.commit();
 
         alert('Investment processed successfully!');
         setIsInvestmentModalOpen(false);
-        refreshUsers(); // Refresh data to show changes
+        refreshData();
 
     } catch (e: any) {
         console.error("Error processing investment: ", e);
@@ -99,7 +101,7 @@ const AdminDashboard = () => {
     const { success, error } = await addUser(formData);
     if (success) {
       setIsAddModalOpen(false);
-      refreshUsers();
+      refreshData();
     } else {
       alert(`Error: ${error}`);
     }
@@ -111,13 +113,12 @@ const AdminDashboard = () => {
       if (success) {
           setIsDeleteModalOpen(false);
           setSelectedUser(null);
-          refreshUsers();
+          refreshData();
       }
   };
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white">
-        {/* Header remains the same */}
         <header className="bg-slate-900/80 backdrop-blur-xl border-b border-gray-800/80 sticky top-0 z-40">
           <div className="max-w-7xl mx-auto flex justify-between items-center p-4">
               <h1 className="text-xl font-bold">Admin Panel</h1>
@@ -142,7 +143,6 @@ const AdminDashboard = () => {
         </div>
         
         <form onSubmit={handleSearch} className="mb-8">
-           {/* Search form remains the same */}
            <div className="relative">
                 <input
                     type="text"
@@ -160,7 +160,6 @@ const AdminDashboard = () => {
         </form>
 
         <div className="bg-slate-900 border border-gray-800/80 rounded-2xl shadow-lg">
-           {/* Table remains the same */}
            <div className="overflow-x-auto">
               {loading ? (
                 <div className='p-12 text-center text-gray-500'>Loading...</div>
@@ -203,7 +202,7 @@ const AdminDashboard = () => {
         isOpen={isViewModalOpen}
         user={selectedUser}
         onClose={() => setIsViewModalOpen(false)}
-        onInvest={openInvestModal} // Changed
+        onInvest={openInvestModal}
         onDelete={openDeleteModal}
       />
 
@@ -219,7 +218,7 @@ const AdminDashboard = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={handleSaveNewUser}
-        isLoading={loading} // You might want a specific loading state for this
+        isLoading={loading}
       />
 
       <DeleteUserModal
@@ -227,7 +226,7 @@ const AdminDashboard = () => {
         user={selectedUser}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        isLoading={loading} // You might want a specific loading state for this
+        isLoading={loading}
       />
     </div>
   );

@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { useUserData } from '@/hooks/useUserData';
-import { Users, PieChart, LogOut, Info, Eye, EyeOff } from 'react-feather';
+import { Users, PieChart, Info, Eye, EyeOff, User } from 'react-feather';
 import Share from '@/components/Share';
 import Withdraw from './components/Withdraw';
 import BuyShares from './components/BuyShares';
@@ -27,8 +28,8 @@ const MiniStatCard = ({ icon, title, value, isLoading, color }: { icon: React.Re
 );
 
 export default function Dashboard() {
-  const { user, signOut } = useAuth();
-  const { totalBalance, totalInvites, share, loading } = useUserData();
+  const { user } = useAuth();
+  const { balance, invited, share, loading } = useUserData();
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   
   const shareText = "Join me on Shere and start earning! Use my link to sign up.";
@@ -45,12 +46,10 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-300">Welcome back,</p>
                   <p className="font-bold text-white -mt-1">{user?.displayName || 'User'}!</p>
               </div>
-              <button 
-                onClick={signOut} 
-                className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-slate-800"
-              >
-                <LogOut size={18} />
-              </button>
+              <Link className="flex items-center gap-2 text-sm text-white bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 px-4 py-2.5 rounded-lg transition-colors" href="/profile">
+                    <User size={16} />
+                    <span>Profile</span>
+              </Link>
             </div>
           </div>
         </div>
@@ -71,7 +70,7 @@ export default function Dashboard() {
                     ) : (
                         <div className="flex items-center gap-4 mt-1">
                             <p className="text-4xl font-bold text-white">
-                                {isBalanceVisible ? `${totalBalance.toLocaleString()} FCFA` : '••••••••'}
+                                {isBalanceVisible ? `${balance.toLocaleString()} FCFA` : '••••••••'}
                             </p>
                             <button onClick={() => setIsBalanceVisible(!isBalanceVisible)} className="text-gray-500 hover:text-white transition-colors">
                                 {isBalanceVisible ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -79,14 +78,14 @@ export default function Dashboard() {
                         </div>
                     )}
                 </div>
-                <Withdraw totalBalance={totalBalance} loading={loading} />
+                <Withdraw balance={balance} loading={loading} />
             </div>
           </div>
 
           <MiniStatCard 
             icon={<Users size={24} className="text-blue-400" />} 
             title="Total Invites" 
-            value={totalInvites.toString()}
+            value={invited.length.toString()}
             isLoading={loading} 
             color="bg-blue-500/10"
           />
