@@ -1,18 +1,19 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { useUserData } from '@/hooks/useUserData';
-import { Users, PieChart, Info, Eye, EyeOff, User } from 'react-feather';
+import { Users, PieChart, Info, Eye, EyeOff, User, Share2 } from 'react-feather';
 import Share from '@/components/Share';
 import Withdraw from './components/Withdraw';
 import BuyShares from './components/BuyShares';
 
-const MiniStatCard = ({ icon, title, value, isLoading, color }: { icon: React.ReactNode; title: string; value: string; isLoading: boolean; color: string }) => (
+const MiniStatCard = ({ icon, title, value, isLoading, color, emptyState }: { icon: React.ReactNode; title: string; value: string; isLoading: boolean; color: string, emptyState?: React.ReactNode }) => (
     <div className={`bg-slate-900 p-6 rounded-2xl border border-gray-800/80 shadow-lg`}>
         <div className="flex items-center">
-            <div className={`w-12 h-12 flex items-center justify-center rounded-full mr-4 ${color}`}>
+            <div className={`w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-full mr-4 ${color}`}>
                 {icon}
             </div>
             <div>
@@ -20,7 +21,7 @@ const MiniStatCard = ({ icon, title, value, isLoading, color }: { icon: React.Re
                 {isLoading ? (
                     <div className="w-24 h-8 bg-slate-700/80 animate-pulse rounded-md mt-1"></div>
                 ) : (
-                    <p className="text-2xl font-bold text-white">{value}</p>
+                    (value === "0" && emptyState) ? emptyState : <p className="text-2xl font-bold text-white">{value}</p>
                 )}
             </div>
         </div>
@@ -29,7 +30,7 @@ const MiniStatCard = ({ icon, title, value, isLoading, color }: { icon: React.Re
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { balance, invited, share, loading } = useUserData();
+  const { balance, invited, share, phone, name, loading } = useUserData();
   const [isBalanceVisible, setIsBalanceVisible] = useState(true);
   
   const shareText = "Join me on Shere and start earning! Use my link to sign up.";
@@ -42,13 +43,13 @@ export default function Dashboard() {
           <div className="flex justify-between items-center h-20">
             <div className="text-2xl font-black text-yellow-400 italic">SHERE.</div>
             <div className="flex items-center gap-4">
-              <div className="text-right hidden sm:block">
+              <div className="text-right">
                   <p className="text-sm text-gray-300">Welcome back,</p>
-                  <p className="font-bold text-white -mt-1">{user?.displayName || 'User'}!</p>
+                  <p className="font-bold text-white -mt-1">{name || user?.displayName || 'User'}!</p>
               </div>
               <Link className="flex items-center gap-2 text-sm text-white bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 px-4 py-2.5 rounded-lg transition-colors" href="/profile">
                     <User size={16} />
-                    <span>Profile</span>
+                    <span className="hidden sm:inline">Profile</span>
               </Link>
             </div>
           </div>
@@ -78,7 +79,7 @@ export default function Dashboard() {
                         </div>
                     )}
                 </div>
-                <Withdraw balance={balance} loading={loading} />
+                <Withdraw balance={balance} loading={loading} phone={phone} name={name || user?.displayName || null} />
             </div>
           </div>
 
@@ -88,6 +89,15 @@ export default function Dashboard() {
             value={invited.length.toString()}
             isLoading={loading} 
             color="bg-blue-500/10"
+            emptyState={
+                <div className='text-sm text-blue-300/80'>
+                    No invites yet. <Share
+                        title={shareTitle}
+                        text={shareText}
+                        embedded
+                    />!
+                </div>
+            }
           />
           <MiniStatCard 
             icon={<PieChart size={24} className="text-yellow-400" />} 
@@ -98,7 +108,7 @@ export default function Dashboard() {
           />
         
           {!loading && share < 50 && (
-            <BuyShares currentShare={share} />
+            <BuyShares currentShare={share} phone={phone} name={name || user?.displayName || null} />
           )}
         </div>
 

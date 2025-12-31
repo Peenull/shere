@@ -7,9 +7,11 @@ import { ArrowDownCircle } from 'react-feather';
 interface WithdrawProps {
   balance: number;
   loading: boolean;
+  phone: string;
+  name: string | null;
 }
 
-export default function Withdraw({ balance, loading }: WithdrawProps) {
+export default function Withdraw({ balance, loading, phone, name }: WithdrawProps) {
   const { user } = useAuth();
   const { prompt, notify } = useDirector();
 
@@ -37,7 +39,12 @@ export default function Withdraw({ balance, loading }: WithdrawProps) {
       });
 
       if (confirmation) {
-        const whatsappMessage = `Hello, I would like to withdraw ${numericAmount.toLocaleString()} FCFA from my Shere account.\n\nUserID: ${user.uid}`;
+        const baseUrl = `${window.location.origin}/admin`;
+        const uidLink = `${baseUrl}?uid=${user.uid}`;
+        const phoneLink = phone ? `${baseUrl}?phone=${encodeURIComponent(phone)}` : 'Not available';
+        const nameLink = name ? `${baseUrl}?name=${encodeURIComponent(name)}` : 'Not available';
+
+        const whatsappMessage = `Hello, I would like to withdraw ${numericAmount.toLocaleString()} FCFA from my Shere account.\n\nUser: ${name || user.displayName || 'N/A'}\nUserID: ${user.uid}\n\nAdmin Links:\n- By UID: ${uidLink}\n- By Phone: ${phoneLink}\n- By Name: ${nameLink}`;
         const whatsappUrl = `https://wa.me/237676736946?text=${encodeURIComponent(whatsappMessage)}`;
         window.open(whatsappUrl, '_blank');
         notify('Redirecting to WhatsApp to complete your request...', true);

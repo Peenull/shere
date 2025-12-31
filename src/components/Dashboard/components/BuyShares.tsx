@@ -6,9 +6,11 @@ import { ShoppingCart, TrendingUp } from 'react-feather';
 
 interface BuySharesProps {
   currentShare: number;
+  phone: string;
+  name: string | null;
 }
 
-export default function BuyShares({ currentShare }: BuySharesProps) {
+export default function BuyShares({ currentShare, phone, name }: BuySharesProps) {
   const { user } = useAuth();
   const { prompt, notify } = useDirector();
 
@@ -36,7 +38,12 @@ export default function BuyShares({ currentShare }: BuySharesProps) {
         });
 
         if (confirmation) {
-            const whatsappMessage = `Hello, I would like to buy ${numericAmount} shares for my Shere account.\n\nUser: ${user.displayName || 'N/A'}\nUserID: ${user.uid}`;
+            const baseUrl = `${window.location.origin}/admin`;
+            const uidLink = `${baseUrl}?uid=${user.uid}`;
+            const phoneLink = phone ? `${baseUrl}?phone=${encodeURIComponent(phone)}` : 'Not available';
+            const nameLink = name ? `${baseUrl}?name=${encodeURIComponent(name)}` : 'Not available';
+
+            const whatsappMessage = `Hello, I would like to buy ${numericAmount} shares for my Shere account.\n\nUser: ${name || user.displayName || 'N/A'}\nUserID: ${user.uid}\n\nAdmin Links:\n- By UID: ${uidLink}\n- By Phone: ${phoneLink}\n- By Name: ${nameLink}`;
             const whatsappUrl = `https://wa.me/237676736946?text=${encodeURIComponent(whatsappMessage)}`;
             window.open(whatsappUrl, '_blank');
             notify('Redirecting to WhatsApp to complete your request...', true);

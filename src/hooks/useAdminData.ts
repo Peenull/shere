@@ -25,7 +25,7 @@ export const useAdminData = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const searchUsers = useCallback(async (searchTerm: string, searchBy: 'name' | 'uid') => {
+  const searchUsers = useCallback(async (searchTerm: string, searchBy: 'name' | 'uid' | 'phone') => {
     if (!searchTerm) {
       setUsers([]);
       return;
@@ -36,6 +36,8 @@ export const useAdminData = () => {
     try {
       let results: UserData[] = [];
       const trimmedSearchTerm = searchTerm.trim();
+      const usersCollectionRef = collection(db, 'users');
+
       if (searchBy === 'uid') {
         const docRef = doc(db, 'users', trimmedSearchTerm);
         const docSnap = await getDoc(docRef);
@@ -43,13 +45,18 @@ export const useAdminData = () => {
           const data = docSnap.data();
           results.push({ uid: docSnap.id, ...data } as UserData);
         }
-      } else {
-        const usersCollectionRef = collection(db, 'users');
+      } else if (searchBy === 'name') {
         const q = query(
           usersCollectionRef, 
           where('name', '>=', trimmedSearchTerm),
           where('name', '<', trimmedSearchTerm + '\uf8ff')
         );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          results.push({ uid: doc.id, ...doc.data() } as UserData);
+        });
+      } else if (searchBy === 'phone') {
+        const q = query(usersCollectionRef, where('phone', '==', trimmedSearchTerm));
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           results.push({ uid: doc.id, ...doc.data() } as UserData);

@@ -3,66 +3,58 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { useDirector } from '@/components/Director';
-import { User, Mail, Phone, Edit, Check, X, Loader, LogIn, UserPlus, LogOut } from 'react-feather';
+import { User, Mail, Phone, Edit, Loader, LogIn, UserPlus, LogOut, Home, Copy } from 'react-feather';
+import EditProfileModal from '@/components/Profile/EditProfileModal';
 
 const ProfilePage = () => {
   const { user, signOut } = useAuth();
   const { notify } = useDirector();
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState({ name: '', phone: '' });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-      try {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setUserData(data);
-          setFormData({ name: data.name || '', phone: data.phone || '' });
-        } else {
-          notify('User data not found.', false);
-        }
-      } catch (error) {
-        notify('Failed to fetch user data.', false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [user, notify]);
-
-  const handleUpdateProfile = async () => {
-    if (!user) return;
-    setIsSaving(true);
+  const fetchUserData = async () => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
     try {
       const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, {
-        name: formData.name,
-        phone: formData.phone,
-      });
-      setUserData((prev: any) => ({ ...prev, name: formData.name, phone: formData.phone }));
-      notify('Profile updated successfully!', true);
-      setIsEditing(false);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        setUserData(userDoc.data());
+      } else {
+        notify('User data not found.', false);
+      }
     } catch (error) {
-      notify('Failed to update profile.', false);
+      notify('Failed to fetch user data.', false);
     } finally {
-      setIsSaving(false);
+      setIsLoading(false);
     }
   };
 
-  if (isLoading) {
+  useEffect(() => {
+    fetchUserData();
+  }, [user, notify]);
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    fetchUserData(); // Refetch data when modal is closed
+  };
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      notify(`${field} copied to clipboard!`, true);
+    }, () => {
+      notify(`Failed to copy ${field}.`, false);
+    });
+  };
+
+  if (isLoading && !userData) { // Show loader only on initial load
     return <div className="flex justify-center items-center h-screen bg-slate-950"><Loader className="animate-spin text-yellow-400" size={48} /></div>;
   }
 
@@ -90,6 +82,7 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
+
         <header className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-white">Your Profile</h1>
@@ -105,38 +98,17 @@ const ProfilePage = () => {
                         <User size={32} className="text-yellow-300" />
                     </div>
                     <div className='flex-grow'>
-                        {isEditing ? (
-                            <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="text-2xl font-bold bg-slate-800 rounded px-2 py-1 w-full"/>
-                        ) : (
-                            <h2 className="text-2xl font-bold text-white">{userData.name}</h2>
-                        )}
+                        <h2 className="text-2xl font-bold text-white">{userData.name || 'User'}</h2>
                         <p className="text-sm text-gray-400 flex items-center gap-2"><Mail size={14}/>{userData.email}</p>
+                        <div onClick={() => copyToClipboard(userData.phone || '', 'Phone')} className="text-sm text-gray-400 flex items-center gap-2 cursor-pointer"><Phone size={14}/>{userData.phone || 'Not available'}</div>
                     </div>
                 </div>
                 <div className='flex gap-2 flex-shrink-0'>
-                    {isEditing ? (
-                        <>
-                            <button onClick={handleUpdateProfile} disabled={isSaving} className="flex items-center gap-2 py-2 px-3 text-sm font-semibold text-black bg-green-500 hover:bg-green-400 rounded-lg transition-colors">
-                                {isSaving ? <Loader size={16} className='animate-spin'/> : <Check size={16} />} <span>Save</span>
-                            </button>
-                            <button onClick={() => setIsEditing(false)} className="flex items-center gap-2 py-2 px-3 text-sm font-semibold text-white bg-slate-600 hover:bg-slate-500 rounded-lg transition-colors">
-                                <X size={16} /> <span>Cancel</span>
-                            </button>
-                        </>
-                    ) : (
-                        <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 py-2 px-4 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors">
-                            <Edit size={16} /> <span>Edit Profile</span>
-                        </button>
-                    )}
+                    <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 py-2 px-4 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors">
+                        <Edit size={16} /> <span>Edit Profile</span>
+                    </button>
                 </div>
             </div>
-
-            {isEditing && (
-              <div className='mt-6 pt-6 border-t border-slate-800'>
-                  <label className="text-sm font-medium text-gray-400 mb-2 block">Phone Number</label>
-                  <input type="text" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full bg-slate-800 border border-gray-700 rounded-lg p-3" placeholder="+123 456 7890"/>
-              </div>
-            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
               <div className="bg-slate-800/50 p-4 rounded-lg">
@@ -147,20 +119,33 @@ const ProfilePage = () => {
                 <p className="text-sm text-slate-400">Share</p>
                 <p className="font-bold text-green-400 text-2xl">{userData.share || 0}%</p>
               </div>
-              <div className="bg-slate-800/50 p-4 rounded-lg">
+              <div onClick={() => copyToClipboard(user.uid, 'Referral Code')} className="bg-slate-800/50 p-4 rounded-lg cursor-pointer">
                 <p className="text-sm text-slate-400">Referral Code</p>
-                <p className="font-mono text-white text-lg break-all">{user.uid}</p>
+                <p className="font-mono text-white text-lg break-all flex items-center gap-2"><Copy size={16}/> {user.uid}</p>
               </div>
             </div>
           </div>
         )}
 
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex justify-center gap-4">
+            <Link href="/" className="w-full max-w-xs flex items-center justify-center gap-2 py-3 px-5 bg-gray-600/20 text-gray-400 font-bold rounded-lg hover:bg-gray-600/30 hover:text-gray-300 transition-colors border border-gray-600/30">
+                <Home size={18} />
+                <span>Home</span>
+            </Link>
             <button onClick={signOut} className="w-full max-w-xs flex items-center justify-center gap-2 py-3 px-5 bg-red-600/20 text-red-400 font-bold rounded-lg hover:bg-red-600/30 hover:text-red-300 transition-colors border border-red-600/30">
                 <LogOut size={18} />
                 <span>Logout</span>
             </button>
         </div>
+
+        {userData && (
+          <EditProfileModal 
+            isOpen={isModalOpen} 
+            onClose={handleModalClose}
+            currentName={userData.name || ''}
+            currentPhone={userData.phone || ''}
+          />
+        )}
 
       </div>
     </div>

@@ -55,7 +55,7 @@ export default function TermsAndConditionsPage() {
 
             <section>
               <h2 className="text-2xl font-bold text-yellow-500 mb-3">8. Contact Us</h2>
-              <p>If you have any questions about these Terms, please contact us at: [Your Contact Email]</p>
+              <p>If you have any questions about these Terms, please contact us at: shereltd@gmail.com</p>
             </section>
 
           </div>

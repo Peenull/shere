@@ -21,17 +21,15 @@ export default function Header() {
               Home
             </Link>
           </li>
-          {user && (
-            <li>
-              <Link href="/dashboard" className="hover:text-yellow-400 transition-colors">
-                Dashboard
-              </Link>
-            </li>
-          )}
           {loading ? (
             <div className="text-gray-400">Loading...</div>
           ) : user ? (
             <>
+              <li>
+                <Link href="/dashboard" className="hover:text-yellow-400 transition-colors">
+                  Dashboard
+                </Link>
+              </li>
               <li>
                 <span className="text-gray-400">Welcome, {user.displayName}</span>
               </li>

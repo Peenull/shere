@@ -1,30 +1,72 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Home, Users, Settings, UserPlus, Search } from 'react-feather';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Home, Users, Settings, UserPlus, Search, Shield, Copy } from 'react-feather';
 import { useAdminData, UserData } from '@/hooks/useAdminData';
+import { useAuth } from '@/components/AuthProvider';
+import { useDirector } from '@/components/Director';
 import AddUserModal from '@/components/Admin/AddUserModal';
 import DeleteUserModal from '@/components/Admin/DeleteUserModal';
 import ViewUserModal from '@/components/Admin/ViewUserModal';
 import ProcessInvestmentModal from '@/components/Admin/ProcessInvestmentModal';
-import { doc, getDoc, writeBatch } from 'firebase/firestore';
+import WithdrawModal from '@/components/Admin/WithdrawModal';
+import { doc, getDoc, writeBatch, runTransaction } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 
 const SHARE_COST = 200; // 1% share costs 200 FCFA
+const ADMIN_UID = 'WtFZkweX9DZl2iALNKyt3UqfBJA3'; // Your Admin UID
 
 const AdminDashboard = () => {
+  const { user: authUser, loading: authLoading } = useAuth();
   const { users, loading, error, searchUsers, addUser, deleteUser } = useAdminData();
+  const { notify } = useDirector();
+  const searchParams = useSearchParams();
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchBy, setSearchBy] = useState<'name' | 'uid'>('uid');
+  const [searchBy, setSearchBy] = useState<'name' | 'uid' | 'phone'>('uid');
   const [hasSearched, setHasSearched] = useState(false);
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isInvestmentModalOpen, setIsInvestmentModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
-  const [isProcessingInvestment, setIsProcessingInvestment] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    const phone = searchParams.get('phone');
+    const uid = searchParams.get('uid');
+    const name = searchParams.get('name');
+
+    if (phone) {
+      setSearchBy('phone');
+      setSearchTerm(phone);
+      setHasSearched(true);
+      searchUsers(phone, 'phone');
+    } else if (uid) {
+      setSearchBy('uid');
+      setSearchTerm(uid);
+      setHasSearched(true);
+      searchUsers(uid, 'uid');
+    } else if (name) {
+      setSearchBy('name');
+      setSearchTerm(name);
+      setHasSearched(true);
+      searchUsers(name, 'name');
+    }
+  }, [searchParams, searchUsers]);
+
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      notify(`${field} copied to clipboard!`, true);
+    }, () => {
+      notify(`Failed to copy ${field}.`, false);
+    });
+  };
 
   const refreshData = () => {
     if (hasSearched) {
@@ -54,8 +96,13 @@ const AdminDashboard = () => {
     setIsDeleteModalOpen(true);
   };
 
+  const openWithdrawModal = (user: UserData) => {
+    setSelectedUser(user);
+    setIsWithdrawModalOpen(true);
+  };
+
   const handleProcessInvestment = async (investorId: string, investmentAmount: number) => {
-    setIsProcessingInvestment(true);
+    setIsProcessing(true);
     try {
         if (!selectedUser) throw new Error("No user selected");
 
@@ -85,15 +132,45 @@ const AdminDashboard = () => {
 
         await batch.commit();
 
-        alert('Investment processed successfully!');
+        notify('Investment processed successfully!', true);
         setIsInvestmentModalOpen(false);
         refreshData();
 
     } catch (e: any) {
         console.error("Error processing investment: ", e);
-        alert(`An error occurred: ${e.message}`);
+        notify(`An error occurred: ${e.message}`, false);
     } finally {
-        setIsProcessingInvestment(false);
+        setIsProcessing(false);
+    }
+  };
+
+  const handleProcessWithdrawal = async (userId: string, amount: number) => {
+    setIsProcessing(true);
+    const userDocRef = doc(db, 'users', userId);
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            const userDoc = await transaction.get(userDocRef);
+            if (!userDoc.exists()) {
+                throw new Error("User not found");
+            }
+            const currentBalance = userDoc.data().balance || 0;
+            if (currentBalance < amount) {
+                throw new Error("Insufficient funds");
+            }
+            const newBalance = currentBalance - amount;
+            transaction.update(userDocRef, { balance: newBalance });
+        });
+
+        notify('Withdrawal successful!', true);
+        setIsWithdrawModalOpen(false);
+        refreshData();
+
+    } catch (e: any) {
+        console.error("Error processing withdrawal: ", e);
+        notify(`An error occurred: ${e.message}`, false);
+    } finally {
+        setIsProcessing(false);
     }
   };
 
@@ -101,9 +178,10 @@ const AdminDashboard = () => {
     const { success, error } = await addUser(formData);
     if (success) {
       setIsAddModalOpen(false);
+      notify('User added successfully', true);
       refreshData();
     } else {
-      alert(`Error: ${error}`);
+      notify(`Error: ${error}`, false);
     }
   };
   
@@ -113,9 +191,24 @@ const AdminDashboard = () => {
       if (success) {
           setIsDeleteModalOpen(false);
           setSelectedUser(null);
+          notify('User deleted successfully!', true);
           refreshData();
       }
   };
+
+  if (authLoading) {
+    return <div className="flex justify-center items-center h-screen bg-slate-950"><Search className="animate-spin text-yellow-400" size={48} /></div>;
+  }
+
+  if (!authUser || authUser.uid !== ADMIN_UID) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-slate-950 text-white">
+        <Shield size={64} className="text-red-500 mb-4" />
+        <h1 className="text-3xl font-bold">Access Denied</h1>
+        <p className="text-slate-400 mt-2">You do not have permission to view this page.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white">
@@ -155,6 +248,7 @@ const AdminDashboard = () => {
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center bg-slate-800 border border-slate-600 rounded-lg p-1">
                     <button type="button" onClick={() => setSearchBy('uid')} className={`px-3 py-1 text-xs rounded-md ${searchBy === 'uid' ? 'bg-yellow-400 text-black' : 'text-gray-300'}`}>UID</button>
                     <button type="button" onClick={() => setSearchBy('name')} className={`px-3 py-1 text-xs rounded-md ${searchBy === 'name' ? 'bg-yellow-400 text-black' : 'text-gray-300'}`}>Name</button>
+                    <button type="button" onClick={() => setSearchBy('phone')} className={`px-3 py-1 text-xs rounded-md ${searchBy === 'phone' ? 'bg-yellow-400 text-black' : 'text-gray-300'}`}>Phone</button>
                 </div>
             </div>
         </form>
@@ -181,14 +275,15 @@ const AdminDashboard = () => {
                     </thead>
                     <tbody>
                         {users.map((user) => (
-                            <tr key={user.uid} onClick={() => openViewModal(user)} className="bg-slate-900 border-b border-gray-800/50 hover:bg-slate-800/40 transition-colors cursor-pointer">
+                            <tr key={user.uid} className="bg-slate-900 border-b border-gray-800/50 hover:bg-slate-800/40 transition-colors">
                                 <td className="px-6 py-4 font-medium text-white whitespace-nowrap">
                                     <div className='font-bold'>{user.name}</div>
-                                    <div className='text-xs text-gray-500'>{user.uid}</div>
+                                    <div onClick={(e) => { e.stopPropagation(); copyToClipboard(user.uid, 'User ID'); }} className='text-xs text-gray-500 flex items-center gap-2 cursor-pointer'><Copy size={12}/> {user.uid}</div>
+                                    <div onClick={(e) => { e.stopPropagation(); copyToClipboard(user.phone || '', 'Phone'); }} className='text-xs text-gray-500 flex items-center gap-2 cursor-pointer'><Copy size={12}/> {user.phone || 'N/A'}</div>
                                 </td>
-                                <td className="px-6 py-4">{(user.balance || 0).toLocaleString()} FCFA</td>
-                                <td className="px-6 py-4">{(user.invited || []).length}</td>
-                                <td className="px-6 py-4 font-bold">{user.share || 0}%</td>
+                                <td onClick={() => openViewModal(user)} className="px-6 py-4 cursor-pointer">{(user.balance || 0).toLocaleString()} FCFA</td>
+                                <td onClick={() => openViewModal(user)} className="px-6 py-4 cursor-pointer">{(user.invited || []).length}</td>
+                                <td onClick={() => openViewModal(user)} className="px-6 py-4 font-bold cursor-pointer">{user.share || 0}%</td>
                             </tr>
                         ))}
                     </tbody>
@@ -204,6 +299,7 @@ const AdminDashboard = () => {
         onClose={() => setIsViewModalOpen(false)}
         onInvest={openInvestModal}
         onDelete={openDeleteModal}
+        onWithdraw={openWithdrawModal}
       />
 
       <ProcessInvestmentModal
@@ -211,7 +307,15 @@ const AdminDashboard = () => {
         user={selectedUser}
         onClose={() => setIsInvestmentModalOpen(false)}
         onSave={handleProcessInvestment}
-        isLoading={isProcessingInvestment}
+        isLoading={isProcessing}
+      />
+
+      <WithdrawModal
+        isOpen={isWithdrawModalOpen}
+        user={selectedUser}
+        onClose={() => setIsWithdrawModalOpen(false)}
+        onConfirm={handleProcessWithdrawal}
+        isLoading={isProcessing}
       />
 
       <AddUserModal

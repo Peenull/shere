@@ -11,6 +11,8 @@ export const useUserData = () => {
     balance: 0,
     invited: [],
     share: 0,
+    phone: '',
+    name: '',
   });
   const [loading, setLoading] = useState(true);
 
@@ -32,6 +34,8 @@ export const useUserData = () => {
           balance: data.balance || 0,
           invited: data.invited || [],
           share: data.share || 0,
+          phone: data.phone || '',
+          name: data.name || '',
         });
       } else {
         // If the document doesn't exist, set default values
@@ -40,6 +44,8 @@ export const useUserData = () => {
           balance: 0,
           invited: [],
           share: 0,
+          phone: '',
+          name: '',
         });
       }
       setLoading(false);

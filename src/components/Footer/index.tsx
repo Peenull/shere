@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Globe, Mail, Phone, Twitter, Facebook, Linkedin } from 'react-feather';
+import { Globe, Mail, Phone, Facebook, MessageCircle } from 'react-feather';
 
 export default function Footer() {
   return (
@@ -24,6 +24,7 @@ export default function Footer() {
               <li><Link href="/about" className="hover:text-yellow-400 transition-colors">About Us</Link></li>
               <li><Link href="/privacy" className="hover:text-yellow-400 transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms" className="hover:text-yellow-400 transition-colors">Terms & Conditions</Link></li>
+              <li><Link href="/faq" className="hover:text-yellow-400 transition-colors">FAQ</Link></li>
               <li><Link href="/signup" className="hover:text-yellow-400 transition-colors">Join Now</Link></li>
             </ul>
           </div>
@@ -34,11 +35,15 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center">
                 <Mail size={16} className="mr-3 text-yellow-400" />
-                <span>support@shere.app</span>
+                <a href="mailto:shereltd@gmail.com" className="hover:text-yellow-400 transition-colors">shereltd@gmail.com</a>
               </li>
               <li className="flex items-center">
                 <Phone size={16} className="mr-3 text-yellow-400" />
-                <span>+237 6XX XXX XXX</span>
+                <a href="tel:+237676736946" className="hover:text-yellow-400 transition-colors">+237 676 736 946</a>
+              </li>
+              <li className="flex items-center">
+                <MessageCircle size={16} className="mr-3 text-yellow-400" />
+                <a href="https://wa.me/237676736946" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors">WhatsApp</a>
               </li>
               <li className="flex items-center">
                 <Globe size={16} className="mr-3 text-yellow-400" />
@@ -53,9 +58,7 @@ export default function Footer() {
             © {new Date().getFullYear()} Shere.app - All Rights Reserved.
           </p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="#" className="text-gray-500 hover:text-yellow-400 transition-colors"><Twitter /></a>
             <a href="#" className="text-gray-500 hover:text-yellow-400 transition-colors"><Facebook /></a>
-            <a href="#" className="text-gray-500 hover:text-yellow-400 transition-colors"><Linkedin /></a>
           </div>
         </div>
       </div>

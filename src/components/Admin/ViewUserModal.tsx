@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, User, DollarSign, Percent, Calendar, Users, Trash2, Eye, Gift } from 'react-feather';
+import { X, User, DollarSign, Percent, Calendar, Users, Trash2, Eye, Gift, Phone, Copy } from 'react-feather';
 import { UserData } from '@/hooks/useAdminData';
+import { useDirector } from '@/components/Director';
 import UserExplorerModal from './UserExplorerModal';
 
 interface ViewUserModalProps {
@@ -11,6 +12,7 @@ interface ViewUserModalProps {
   onClose: () => void;
   onInvest: (user: UserData) => void;
   onDelete: (user: UserData) => void;
+  onWithdraw: (user: UserData) => void;
 }
 
 const Stat = ({ label, value, icon }: { label: string; value: string | number; icon: React.ReactNode }) => (
@@ -23,10 +25,19 @@ const Stat = ({ label, value, icon }: { label: string; value: string | number; i
   </div>
 );
 
-const ViewUserModal: React.FC<ViewUserModalProps> = ({ isOpen, user, onClose, onInvest, onDelete }) => {
+const ViewUserModal: React.FC<ViewUserModalProps> = ({ isOpen, user, onClose, onInvest, onDelete, onWithdraw }) => {
+  const { notify } = useDirector();
   const [explorerProps, setExplorerProps] = useState<{isOpen: boolean, user: UserData | null}>({ isOpen: false, user: null });
 
   if (!isOpen || !user) return null;
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      notify(`${field} copied to clipboard!`, true);
+    }, () => {
+      notify(`Failed to copy ${field}.`, false);
+    });
+  };
 
   const formattedDate = user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
 
@@ -40,8 +51,6 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({ isOpen, user, onClose, on
 
   const exploreReferredBy = () => {
     if (user.referredBy) {
-      // We create a temporary UserData object to pass to the explorer.
-      // The explorer will then fetch the full data.
       const referredByUser = { uid: user.referredBy, name: "Referrer" } as UserData;
       openExplorer(referredByUser);
     }
@@ -63,7 +72,8 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({ isOpen, user, onClose, on
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">{user.name}</h2>
-                <p className="text-sm text-slate-400 font-mono">{user.uid}</p>
+                <div onClick={() => copyToClipboard(user.uid, 'User ID')} className='text-sm text-slate-400 font-mono flex items-center gap-2 cursor-pointer'><Copy size={12}/> {user.uid}</div>
+                <div onClick={() => copyToClipboard(user.phone || '', 'Phone')} className='text-sm text-slate-400 font-mono flex items-center gap-2 cursor-pointer'><Phone size={12}/> {user.phone || 'Not available'}</div>
               </div>
             </div>
             <button onClick={onClose} className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors">
@@ -85,7 +95,7 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({ isOpen, user, onClose, on
                 <div className="flex justify-between items-center bg-slate-800/60 p-3 rounded-md">
                   <div>
                     <p className="font-semibold text-slate-300">This user was referred. Click to explore.</p>
-                    <p className="text-xs text-slate-400 font-mono">{user.referredBy}</p>
+                    <div onClick={() => copyToClipboard(user.referredBy || '', 'Referred By ID')} className='text-xs text-slate-400 font-mono flex items-center gap-2 cursor-pointer'><Copy size={12}/> {user.referredBy}</div>
                   </div>
                   <button onClick={exploreReferredBy} className="p-2 text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-full transition-colors">
                     <Eye size={20} />
@@ -103,7 +113,7 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({ isOpen, user, onClose, on
                       <li key={inviteeId} className="flex justify-between items-center bg-slate-800/60 p-3 rounded-md">
                         <div>
                           <p className="font-semibold text-white">Invited User</p>
-                          <p className="text-xs text-slate-400 font-mono">{inviteeId}</p>
+                          <div onClick={() => copyToClipboard(inviteeId, 'Invited User ID')} className='text-xs text-slate-400 font-mono flex items-center gap-2 cursor-pointer'><Copy size={12}/> {inviteeId}</div>
                         </div>
                         <div className="flex items-center gap-4">
                           <button onClick={() => openExplorer({ uid: inviteeId, name: 'Invited User' } as UserData)} className="p-2 text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-full transition-colors">
@@ -129,6 +139,12 @@ const ViewUserModal: React.FC<ViewUserModalProps> = ({ isOpen, user, onClose, on
                 className="flex items-center gap-2 py-2 px-4 text-sm font-semibold text-white bg-red-600/80 hover:bg-red-600 rounded-lg transition-colors">
                 <Trash2 size={16} />
                 <span>Delete</span>
+              </button>
+              <button 
+                onClick={() => { onClose(); onWithdraw(user); }}
+                className="flex items-center gap-2 py-2 px-4 text-sm font-semibold text-white bg-blue-600/80 hover:bg-blue-600 rounded-lg transition-colors">
+                <DollarSign size={16} />
+                <span>Withdraw</span>
               </button>
               <button 
                 onClick={() => { onClose(); onInvest(user); }}
