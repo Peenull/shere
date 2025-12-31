@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import Director from "@/components/Director";
 import Footer from "@/components/Footer";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -49,6 +50,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-slate-950`}>
+        {process.env.NODE_ENV === "production" && (
+          <GoogleAnalytics measurementId="G-TS664CZ977" />
+        )}
         <Director>
           <AuthProvider>
             <main>{children}</main>

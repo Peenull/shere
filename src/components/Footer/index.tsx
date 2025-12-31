@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Globe, Mail, Phone, Twitter, Facebook, Linkedin } from 'react-feather';
 
 export default function Footer() {
@@ -20,9 +21,10 @@ export default function Footer() {
           <div>
             <h4 className="font-bold text-white tracking-wider uppercase mb-4">Links</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-yellow-400 transition-colors">How It Works</a></li>
-              <li><a href="/about" className="hover:text-yellow-400 transition-colors">About Us</a></li>
-              <li><a href="/signup" className="hover:text-yellow-400 transition-colors">Join Now</a></li>
+              <li><Link href="/about" className="hover:text-yellow-400 transition-colors">About Us</Link></li>
+              <li><Link href="/privacy" className="hover:text-yellow-400 transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-yellow-400 transition-colors">Terms & Conditions</Link></li>
+              <li><Link href="/signup" className="hover:text-yellow-400 transition-colors">Join Now</Link></li>
             </ul>
           </div>
 
