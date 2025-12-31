@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Shere - Share, Earn, Repeat",
     description: "The easiest way to monetize your network.",
-    url: "https://shere.com", // Replace with your actual domain
+    url: "https://shere-pi.vercel.app", // Replace with your actual domain
     siteName: "Shere",
     images: [
       {
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
     images: ["/opengraph-image.png"], 
   },
   icons: {
-    icon: './icon.png',
-    apple: './icon.png',
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
   }
 };
 
