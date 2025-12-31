@@ -95,10 +95,6 @@ const ProfilePage = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-white">Your Profile</h1>
             <p className="text-gray-400 mt-1">View your stats and manage your personal information.</p>
           </div>
-          <button onClick={signOut} className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 bg-red-600/80 text-white font-bold rounded-lg hover:bg-red-500 transition-colors">
-              <LogOut size={18} />
-              <span>Logout</span>
-          </button>
         </header>
 
         {userData && (
@@ -158,6 +154,14 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
+
+        <div className="mt-8 flex justify-center">
+            <button onClick={signOut} className="w-full max-w-xs flex items-center justify-center gap-2 py-3 px-5 bg-red-600/20 text-red-400 font-bold rounded-lg hover:bg-red-600/30 hover:text-red-300 transition-colors border border-red-600/30">
+                <LogOut size={18} />
+                <span>Logout</span>
+            </button>
+        </div>
+
       </div>
     </div>
   );
