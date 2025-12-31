@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function Header() {
@@ -10,18 +11,14 @@ export default function Header() {
   return (
     <header className="bg-slate-900 text-white p-4 shadow-md">
       <nav className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-yellow-400">
-          MyApp
+        <Link href="/" className="flex items-center gap-3">
+          <Image src="/logo.svg" alt="Shere Logo" width={40} height={40} />
+          <span className="text-2xl font-bold text-white">Shere</span>
         </Link>
         <ul className="flex gap-6 items-center">
           <li>
             <Link href="/" className="hover:text-yellow-400 transition-colors">
               Home
-            </Link>
-          </li>
-          <li>
-            <Link href="/about" className="hover:text-yellow-400 transition-colors">
-              About
             </Link>
           </li>
           {user && (

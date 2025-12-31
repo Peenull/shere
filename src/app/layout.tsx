@@ -10,10 +10,13 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Shere - Share, Earn, Repeat",
   description: "Join the Shere network to earn rewards by sharing and growing your connections. The easiest way to monetize your network.",
+  other: {
+    'google-adsense-account': 'ca-pub-4173165508132580',
+  },
   openGraph: {
     title: "Shere - Share, Earn, Repeat",
     description: "The easiest way to monetize your network.",
-    url: "https://shere-pi.vercel.app", // Replace with your actual domain
+    url: "https://shere.com", // Replace with your actual domain
     siteName: "Shere",
     images: [
       {
@@ -32,8 +35,9 @@ export const metadata: Metadata = {
     images: ["/opengraph-image.png"], 
   },
   icons: {
-    icon: '/icon.png',
-    apple: '/apple-icon.png',
+    icon: '/logo.svg',
+    shortcut: '/logo.svg',
+    apple: '/logo.svg',
   }
 };
 
