@@ -89,14 +89,14 @@ export default function Dashboard() {
 
           <MiniStatCard 
             icon={<Users size={24} className="text-blue-400" />} 
-            title="Total Invites" 
+            title="Invites" 
             value={invited.length.toString()}
             isLoading={loading} 
             color="bg-blue-500/10"
           />
           <MiniStatCard 
             icon={<PieChart size={24} className="text-yellow-400" />} 
-            title="Your Share" 
+            title="Share" 
             value={`${share}%`}
             isLoading={loading} 
             color="bg-yellow-500/10"
