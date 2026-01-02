@@ -83,7 +83,7 @@ const Share: React.FC<ShareProps> = ({ text, title }) => {
 
       <div className="flex items-center my-6">
         <div className="flex-grow border-t border-gray-700/50"></div>
-        <span className="flex-shrink mx-4 text-gray-500 text-xs">Or use a specific platform</span>
+        <span className="flex-shrink mx-4 text-gray-500 text-sm">or</span>
         <div className="flex-grow border-t border-gray-700/50"></div>
       </div>
 

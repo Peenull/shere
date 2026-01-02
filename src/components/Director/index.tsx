@@ -1,10 +1,11 @@
 'use client';
 import { createContext, useState, useRef, useContext, ReactNode } from 'react';
 import Notification from '../Notification/Notification';
-import Prompt from './Prompt';
+import NewPrompt from './NewPrompt';
 
 interface PromptOptions {
-  message?: string;
+  title?: string;
+  subtitle?: string | ReactNode;
   type?: 'confirm' | 'input';
   inputLabel?: string;
   inputPlaceholder?: string;
@@ -92,7 +93,7 @@ export default function Director({ children }: DirectorProps) {
           <Notification message={message} messageGood={messageGood} />
         )}
 
-        <Prompt
+        <NewPrompt
           open={promptOpen}
           onClose={handlePromptClose}
           onConfirm={handlePromptConfirm}

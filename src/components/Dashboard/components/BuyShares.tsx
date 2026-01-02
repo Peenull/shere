@@ -19,7 +19,8 @@ export default function BuyShares({ currentShare, phone, name }: BuySharesProps)
 
     const amount = await prompt({
         type: 'input',
-        message: 'How many shares do you want to buy?',
+        title: 'Buy More Shares',
+        subtitle: `You currently have ${currentShare}%. You can buy up to ${50 - currentShare} more shares.`,
         inputLabel: 'Number of Shares',
         inputPlaceholder: 'e.g., 10',
         okText: 'Request Purchase',
@@ -33,7 +34,8 @@ export default function BuyShares({ currentShare, phone, name }: BuySharesProps)
         }
 
         const confirmation = await prompt({
-            message: `You are about to request to buy ${numericAmount} shares. Proceed?`,
+            title: 'Confirm Purchase',
+            subtitle: `You are about to request to buy ${numericAmount} shares. Proceed?`,
             okText: 'Confirm'
         });
 

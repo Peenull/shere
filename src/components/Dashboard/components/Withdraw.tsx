@@ -20,7 +20,8 @@ export default function Withdraw({ balance, loading, phone, name }: WithdrawProp
 
     const amount = await prompt({
       type: 'input',
-      message: 'How much do you want to withdraw?',
+      title: 'Request a Withdrawal',
+      subtitle: `Your current balance is ${balance.toLocaleString()} FCFA.`,
       inputLabel: 'Amount (FCFA)',
       inputPlaceholder: 'e.g., 5000',
       okText: 'Request Withdraw',
@@ -34,7 +35,8 @@ export default function Withdraw({ balance, loading, phone, name }: WithdrawProp
       }
 
       const confirmation = await prompt({
-        message: `You are about to request a withdrawal of ${numericAmount.toLocaleString()} FCFA. Proceed?`,
+        title: 'Confirm Withdrawal',
+        subtitle: `You are about to request a withdrawal of ${numericAmount.toLocaleString()} FCFA. Proceed?`,
         okText: 'Confirm',
       });
 

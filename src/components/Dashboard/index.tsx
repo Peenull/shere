@@ -1,11 +1,10 @@
-
 'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/AuthProvider';
 import { useUserData } from '@/hooks/useUserData';
-import { Users, PieChart, Info, Eye, EyeOff, User, Share2 } from 'react-feather';
+import { Users, PieChart, Info, Eye, EyeOff, User, Share2, ArrowRight } from 'react-feather';
 import Share from '@/components/Share';
 import Withdraw from './components/Withdraw';
 import BuyShares from './components/BuyShares';
@@ -21,7 +20,7 @@ const MiniStatCard = ({ icon, title, value, isLoading, color, emptyState }: { ic
                 {isLoading ? (
                     <div className="w-24 h-8 bg-slate-700/80 animate-pulse rounded-md mt-1"></div>
                 ) : (
-                    (value === "0" && emptyState) ? emptyState : <p className="text-2xl font-bold text-white">{value}</p>
+                    <p className="text-2xl font-bold text-white">{value}</p>
                 )}
             </div>
         </div>
@@ -36,6 +35,11 @@ export default function Dashboard() {
   const shareText = "Join me on Shere and start earning! Use my link to sign up.";
   const shareTitle = "Join me on Shere!";
 
+  const getFirstName = (fullName: string | null | undefined): string => {
+    if (!fullName) return 'User';
+    return fullName.split(' ')[0];
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 font-sans">
       <header className="bg-slate-950/80 backdrop-blur-lg border-b border-gray-800/50 sticky top-0 z-20">
@@ -45,7 +49,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-4">
               <div className="text-right">
                   <p className="text-sm text-gray-300">Welcome back,</p>
-                  <p className="font-bold text-white -mt-1">{name || user?.displayName || 'User'}!</p>
+                  <p className="font-bold text-white -mt-1">{getFirstName(name || user?.displayName)}!</p>
               </div>
               <Link className="flex items-center gap-2 text-sm text-white bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 px-4 py-2.5 rounded-lg transition-colors" href="/profile">
                     <User size={16} />
@@ -89,11 +93,6 @@ export default function Dashboard() {
             value={invited.length.toString()}
             isLoading={loading} 
             color="bg-blue-500/10"
-            emptyState={
-                <div className='text-sm text-blue-300/80'>
-                    No invites yet.
-                </div>
-            }
           />
           <MiniStatCard 
             icon={<PieChart size={24} className="text-yellow-400" />} 
@@ -114,14 +113,11 @@ export default function Dashboard() {
           <Share title={shareTitle} text={shareText} />
         </div>
 
-        <div className="mt-12">
-            <div className="bg-slate-900 border border-gray-800/80 rounded-2xl p-8 text-center shadow-lg">
-              <Info size={24} className="text-gray-500 mx-auto mb-4"/>
-              <h3 className="text-xl font-bold text-white mb-2">How It Works</h3>
-              <p className="text-gray-400 max-w-2xl mx-auto">
-                Your <span className="font-bold text-yellow-400">Share Percentage</span> determines your portion of the daily ad revenue pool. Increase your shares by inviting friends or purchasing more. Every ad watch and every new referral contributes to your earnings.
-              </p>
-            </div>
+        <div className="mt-12 text-center">
+            <Link href="/about#how-it-works" className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors font-semibold group">
+                <span>Learn More About How Shere Works</span>
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform"/>
+            </Link>
         </div>
       </main>
     </div>
