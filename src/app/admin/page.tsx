@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Home, Users, Settings, UserPlus, Search, Shield, Copy } from 'react-feather';
 import { useAdminData, UserData } from '@/hooks/useAdminData';
@@ -17,7 +17,7 @@ import { db } from '../../../lib/firebase';
 const SHARE_COST = 200; // 1% share costs 200 FCFA
 const ADMIN_UID = 'WtFZkweX9DZl2iALNKyt3UqfBJA3'; // Your Admin UID
 
-const AdminDashboard = () => {
+const AdminDashboardContent = () => {
   const { user: authUser, loading: authLoading } = useAuth();
   const { users, loading, error, searchUsers, addUser, deleteUser } = useAdminData();
   const { notify } = useDirector();
@@ -333,6 +333,14 @@ const AdminDashboard = () => {
         isLoading={loading}
       />
     </div>
+  );
+};
+
+const AdminDashboard = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AdminDashboardContent />
+    </Suspense>
   );
 };
 
