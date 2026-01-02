@@ -214,7 +214,7 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-slate-950 font-sans text-white">
         <header className="bg-slate-900/80 backdrop-blur-xl border-b border-gray-800/80 sticky top-0 z-40">
           <div className="max-w-7xl mx-auto flex justify-between items-center p-4">
-              <h1 className="text-xl font-bold">Admin Panel</h1>
+              <h1 className="text-xl font-bold">Admin</h1>
               <nav className="flex items-center gap-4">
                   <a href="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"><Home size={18}/> Home</a>
                   <a href="/admin" className="flex items-center gap-2 text-white font-semibold"><Users size={18}/> Users</a>
