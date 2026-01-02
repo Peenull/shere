@@ -20,7 +20,7 @@ export default function BuyShares({ currentShare, phone, name }: BuySharesProps)
     const amount = await prompt({
         type: 'input',
         title: 'Buy More Shares',
-        subtitle: `You currently have ${currentShare}%. You can buy up to ${50 - currentShare} more shares.`,
+        subtitle: `You currently have ${currentShare}%. You can buy up to ${50 - currentShare}% more shares.`,
         inputLabel: 'Number of Shares',
         inputPlaceholder: 'e.g., 10',
         okText: 'Request Purchase',
@@ -29,13 +29,13 @@ export default function BuyShares({ currentShare, phone, name }: BuySharesProps)
     if (amount && !isNaN(Number(amount))) {
         const numericAmount = Number(amount);
         if (currentShare + numericAmount > 50) {
-            notify(`You can only buy up to ${50 - currentShare} more shares.`, false);
+            notify(`You can only buy up to ${50 - currentShare}% more shares.`, false);
             return;
         }
 
         const confirmation = await prompt({
             title: 'Confirm Purchase',
-            subtitle: `You are about to request to buy ${numericAmount} shares. Proceed?`,
+            subtitle: `You are about to request to buy ${numericAmount}% shares. Proceed?`,
             okText: 'Confirm'
         });
 
@@ -45,7 +45,7 @@ export default function BuyShares({ currentShare, phone, name }: BuySharesProps)
             const phoneLink = phone ? `${baseUrl}?phone=${encodeURIComponent(phone)}` : 'Not available';
             const nameLink = name ? `${baseUrl}?name=${encodeURIComponent(name)}` : 'Not available';
 
-            const whatsappMessage = `Hello, I would like to buy ${numericAmount} shares for my Shere account.\n\nUser: ${name || user.displayName || 'N/A'}\nUserID: ${user.uid}\n\nAdmin Links:\n- By UID: ${uidLink}\n- By Phone: ${phoneLink}\n- By Name: ${nameLink}`;
+            const whatsappMessage = `Hello, I would like to buy ${numericAmount}% shares for my Shere account.\n\nUser: ${name || user.displayName || 'N/A'}\nUserID: ${user.uid}\n\nAdmin Links:\n- By UID: ${uidLink}\n- By Phone: ${phoneLink}\n- By Name: ${nameLink}`;
             const whatsappUrl = `https://wa.me/237676736946?text=${encodeURIComponent(whatsappMessage)}`;
             window.open(whatsappUrl, '_blank');
             notify('Redirecting to WhatsApp to complete your request...', true);
