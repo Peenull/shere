@@ -91,11 +91,7 @@ export default function Dashboard() {
             color="bg-blue-500/10"
             emptyState={
                 <div className='text-sm text-blue-300/80'>
-                    No invites yet. <Share
-                        title={shareTitle}
-                        text={shareText}
-                        embedded
-                    />!
+                    No invites yet.
                 </div>
             }
           />
