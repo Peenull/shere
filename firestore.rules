@@ -1,0 +1,106 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to check if the requesting user is the admin.
+    function isAdmin() {
+      return request.auth.uid == 'V8bQJIh3sLbN9KjOQl3UgQSbtjUY';
+    }
+
+    match /admin/variables {
+      allow read: if request.auth.uid != null
+      allow read, write, update, delete: if isAdmin();
+    }
+
+    // Rules for the 'users' collection
+    match /users/{userId} {
+      // READ: Users can read their own profile. Admins can read any profile.
+      allow read: if request.auth.uid == userId || isAdmin();
+
+      // CREATE: A new user can create their own document upon signup.
+      allow create: if request.auth.uid == userId
+                      && request.resource.data.uid == userId
+                      && request.resource.data.balance == 0
+                      && request.resource.data.share == 0
+                      && request.resource.data.invited.size() == 0
+                      && request.resource.data.createdAt == request.time
+                      && (!('referredBy' in request.resource.data) || request.resource.data.referredBy is string)
+                      && !('isAdmin' in request.resource.data);
+
+      // UPDATE: User can update non-critical parts of their profile, or Admin can update anything.
+      allow update: if (request.auth.uid == userId
+                      // A user cannot change their own balance, share, invites, or UID.
+                      && request.resource.data.balance == resource.data.balance
+                      && request.resource.data.share == resource.data.share
+                      && request.resource.data.invited == resource.data.invited
+                      && request.resource.data.uid == resource.data.uid
+                      // The phone number is immutable once set during signup.
+                      && request.resource.data.phone == resource.data.phone
+                      // The phoneAccountName can be set once if it doesn't exist, but cannot be changed afterward.
+                      && (!('phoneAccountName' in resource.data) || request.resource.data.phoneAccountName == resource.data.phoneAccountName)
+                    ) || isAdmin();
+
+      // DELETE: Deleting user accounts is disallowed for data integrity.
+      allow delete: if false;
+
+      // Rules for the 'withdrawals' subcollection within a user's document
+      match /withdrawals/{withdrawalId} {
+        // READ: A user can only read their OWN withdrawal documents.
+        // The admin's read access is handled by the global rule below.
+        allow get, list: if request.auth.uid == userId;
+
+        // CREATE: A user can create a withdrawal request for themselves.
+        allow create: if request.auth.uid == userId
+                        // Validate the request data fields
+                        && request.resource.data.userId == userId
+                        && request.resource.data.status == 'pending'
+                        && request.resource.data.amount > 0
+                        // CRITICAL: Check if withdrawal amount is not more than the user's actual balance.
+                        && request.resource.data.amount <= get(/databases/$(database)/documents/users/$(userId)).data.balance
+                        && request.resource.data.rejectionReason == ''
+                        && request.resource.data.completeDate == null;
+
+        // UPDATE/DELETE by a regular user is disallowed. Admin access is handled globally.
+        allow update, delete: if false;
+      }
+
+      // Rules for the 'sharePurchases' subcollection within a user's document
+      match /sharePurchases/{purchaseId} {
+        // READ: A user can only read their OWN share purchase documents.
+        allow get, list: if request.auth.uid == userId;
+
+        // CREATE: A user can create a share purchase request for themselves.
+        allow create: if request.auth.uid == userId
+                        && request.resource.data.userId == userId
+                        && request.resource.data.status == 'pending'
+                        && request.resource.data.percentage > 0
+                        && request.resource.data.percentage <= 50
+                        && request.resource.data.amount > 0
+                        && request.resource.data.rejectionReason == ''
+                        && !('completeDate' in request.resource.data);
+
+        // UPDATE/DELETE by a regular user is disallowed.
+        allow update, delete: if false;
+      }
+    }
+
+    // Global rule for the 'withdrawals' collection group.
+    // This is required for the admin to query across all users' withdrawals at once.
+    match /{path=**}/withdrawals/{withdrawalId} {
+      // READ: Admin can read any withdrawal document.
+      allow get, list: if isAdmin();
+      
+      // UPDATE: Admin can update any withdrawal document.
+      allow update: if isAdmin()
+                    // Prevent admins from accidentally changing critical data of the request.
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.amount == resource.data.amount;
+    }
+
+    // Global rule for the 'sharePurchases' collection group.
+    match /{path=**}/sharePurchases/{purchaseId} {
+      allow get, list, update: if isAdmin();
+    }
+  }
+}
