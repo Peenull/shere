@@ -64,7 +64,7 @@ const MiniStatCard = ({
         {title === "Share" && (
           <Link
             href="/buy-shares"
-            className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all"
+            className=`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all ${value >= 50 && "hidden"}`
           >
             <Plus size={20} />
           </Link>
@@ -111,11 +111,6 @@ export default function Dashboard() {
 
   function formatBalanceResponsive(value: number) {
     if (typeof window !== "undefined" && window.innerWidth <= 450) {
-      return new Intl.NumberFormat("en", {
-        notation: "compact",
-        maximumFractionDigits: 1,
-      }).format(value);
-    }
     return new Intl.NumberFormat().format(value);
   }
 
