@@ -32,7 +32,7 @@ const IconInput = ({
 }: {
   icon: React.ReactNode;
   label: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => (
   <div>
     <label className="text-sm font-medium text-gray-400 mb-2 block">
@@ -81,7 +81,7 @@ export default function SignupForm() {
     if (auth?.currentUser?.uid) {
       router.push("/");
     }
-  }, []);
+  }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -139,6 +139,7 @@ export default function SignupForm() {
           share: 0,
           phoneAccountName: formData.phoneAccountName,
         });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (dbError: any) {
         // If Firestore write fails, roll back auth user creation
         notify("Failed to save user data. Rolling back...", false);
@@ -150,6 +151,7 @@ export default function SignupForm() {
 
       notify("Account created successfully! Redirecting...", true);
       router.push("/");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       // Catches both auth and Firestore errors
       const friendlyError = formatFirebaseError(error.code || "SIGNUP_FAILED");
