@@ -72,11 +72,11 @@ const Share: React.FC<ShareProps> = ({ text, title, big }) => {
         <button
           onClick={handlePrimaryInvite}
           disabled={!url}
-          className="w-full flex items-center justify-center gap-3 py-4 px-5 bg-yellow-400 text-slate-950 font-black text-sm uppercase tracking-widest rounded-2xl transition-transform active:scale-95 disabled:opacity-50 shadow-lg shadow-yellow-400/20"
+          className="w-full flex items-center justify-center gap-3 py-4 px-5 bg-yellow-400/10 cursor-pointer border border-yellow-400/20 text-yellow-400 font-black text-sm uppercase tracking-widest rounded-2xl active:scale-95 disabled:opacity-50 "
           aria-disabled={!url}
         >
           <Share2 size={18} strokeWidth={3} />
-          <span>Invite Friends</span>
+          <span>Invite</span>
         </button>
 
         <div className="relative flex items-center gap-4">

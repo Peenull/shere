@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import { useUserData } from "@/hooks/useUserData";
@@ -10,16 +10,15 @@ import {
   Eye,
   EyeOff,
   User,
-  ArrowRight,
   Clock,
-  TrendingUp,
-  Zap,
   Shield,
   Plus,
   Download,
   Share2,
 } from "react-feather";
 import Share from "@/components/Share";
+import { useRouter } from "next/navigation";
+import { useDirector } from "../Director";
 
 const shareText = "Join me on Shere and start earning! Use my link to sign up.";
 const shareTitle = "Join me on Shere!";
@@ -42,7 +41,7 @@ const MiniStatCard = ({
   <div className="flex-1 min-w-0 bg-slate-900 p-4 sm:p-6 rounded-3xl border border-gray-800/80 shadow-lg flex items-center transition-all hover:border-gray-700 hover:bg-slate-800/50 group">
     <div className="flex items-center gap-4 w-full">
       <div
-        className={`w-10 h-10 sm:w-14 sm:h-14 flex-shrink-0 flex items-center justify-center rounded-2xl ${color} transition-transform group-hover:scale-110`}
+        className={`w-10 h-10 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center rounded-2xl ${color} transition-transform group-hover:scale-110`}
       >
         {icon}
       </div>
@@ -64,7 +63,7 @@ const MiniStatCard = ({
         {title === "Share" && (
           <Link
             href="/buy-shares"
-            className=`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all ${value >= 50 && "hidden"}`
+            className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all { value >= 50 && "hidden" }`}
           >
             <Plus size={20} />
           </Link>
@@ -98,8 +97,11 @@ const MiniStatCard = ({
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { balance, invited, share, name, loading } = useUserData();
+  const { balance, invited, share, name, loading, validUser, error } =
+    useUserData();
   const [isBalanceVisible, setIsBalanceVisible] = useState(false);
+  const router = useRouter();
+  const { notify } = useDirector();
 
   // FIX: Derived URL to prevent re-render loops
   const url = useMemo(() => {
@@ -111,13 +113,23 @@ export default function Dashboard() {
 
   function formatBalanceResponsive(value: number) {
     if (typeof window !== "undefined" && window.innerWidth <= 450) {
-    return new Intl.NumberFormat().format(value);
+      return new Intl.NumberFormat().format(value);
+    }
   }
 
   const getFirstName = (fullName: string | null | undefined): string => {
     if (!fullName) return "User";
     return fullName.split(" ")[0];
   };
+
+  useEffect(() => {
+    if (error) {
+      notify("Failed to Fetch User Data", false);
+    }
+    if (!validUser) {
+      router.push("/signup");
+    }
+  }, [validUser, router, error, notify]);
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white pb-20 selection:bg-yellow-400/30">
@@ -144,7 +156,7 @@ export default function Dashboard() {
               {user?.uid === "WtFZkweX9DZl2iALNKyt3UqfBJA3" && (
                 <Link
                   href="/admin"
-                  className="hidden sm:flex items-center gap-2 text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-yellow-400 hover:text-black transition-all"
+                  className="flex items-center gap-2 text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-yellow-400 hover:text-black transition-all"
                 >
                   <Shield size={14} /> Admin
                 </Link>
@@ -155,6 +167,12 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
+        <Link
+          className="fixed bottom-6 z-index-50 items-center gap-2 text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-yellow-400 hover:text-black transition-all"
+          href="/buy-shares"
+        >
+          Buy Share
+        </Link>
         {/* Welcome Section */}
         <div className="mb-10 lg:mb-14">
           <h1 className="text-4xl sm:text-6xl font-black tracking-tighter mb-2">
@@ -163,15 +181,10 @@ export default function Dashboard() {
               {getFirstName(name || user?.displayName)}
             </span>
           </h1>
-          <p className="text-gray-500 text-lg font-medium">
-            Your financial ecosystem at a glance.
-          </p>
         </div>
 
-        {/* Main Grid: Responsive column handling */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-          {/* Balance Card: Spans 2 columns on Large screens */}
-          <div className="sm:col-span-2 relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 p-6 sm:p-8 max-[450px]:p-4 rounded-4xl border border-gray-800/80 shadow-2xl">
+          <div className="sm:col-span-2 relative overflow-hidden bg-linear-to-br from-slate-900 via-slate-900 to-slate-800 p-6 sm:p-8 max-[450px]:p-4 rounded-4xl border border-gray-800/80 shadow-2xl">
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-400/10 blur-3xl rounded-full"></div>
 
             <div className="relative z-10 flex flex-col gap-6">
@@ -229,7 +242,7 @@ export default function Dashboard() {
               <div className="flex gap-2">
                 <Link
                   href="/withdrawal"
-                  className="group flex-1 flex items-center justify-center gap-3 bg-gradient-to-r from-yellow-400/10 to-yellow-500/10 text-yellow-400 font-black py-4 px-6 max-[450px]:py-3 max-[450px]:px-3 rounded-2xl active:scale-95 text-xs sm:text-sm uppercase tracking-widest border border-yellow-400/20 min-h-[44px]"
+                  className="group flex-1 flex items-center justify-center gap-3 bg-linear-to-r from-yellow-400/10 to-yellow-500/10 text-yellow-400 font-black py-4 px-6 max-[450px]:py-3 max-[450px]:px-3 rounded-2xl active:scale-95 text-xs sm:text-sm uppercase tracking-widest border border-yellow-400/20 min-h-[44px]"
                 >
                   <span className="truncate">Withdraw</span>
                   <Download

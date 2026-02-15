@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/components/AuthProvider';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase'; // Corrected import path
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/AuthProvider";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase"; // Corrected import path
 
 export const useUserData = () => {
   const { user } = useAuth();
@@ -11,9 +11,11 @@ export const useUserData = () => {
     balance: 0,
     invited: [],
     share: 0,
-    phone: '',
-    phoneAccountName: '', // Added new field
-    name: '',
+    phone: "",
+    phoneAccountName: "",
+    name: "",
+    error: false,
+    validUser: true,
   });
   const [loading, setLoading] = useState(true);
 
@@ -24,38 +26,47 @@ export const useUserData = () => {
     }
 
     // Reference to the user's document in the 'users' collection
-    const userDocRef = doc(db, 'users', user.uid);
+    const userDocRef = doc(db, "users", user.uid);
 
     // Set up the real-time listener
-    const unsubscribe = onSnapshot(userDocRef, (snapshot: any) => {
-      if (snapshot.exists()) {
-        // If the document exists, update the state
-        const data = snapshot.data();
-        setUserData({
-          balance: data.balance || 0,
-          invited: data.invited || [],
-          share: data.share || 0,
-          phone: data.phone || '',
-          phoneAccountName: data.phoneAccountName || '', // Added new field
-          name: data.name || '',
-        });
-      } else {
-        // If the document doesn't exist, set default values
-        setUserData({
-          balance: 0,
-          invited: [],
-          share: 0,
-          phone: '',
-          phoneAccountName: '',
-          name: '',
-        });
-      }
-      setLoading(false);
-    }, (error: any) => {
-      // Handle any errors during the fetch
-      console.error("Error fetching user data:", error);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      userDocRef,
+      (snapshot: any) => {
+        if (snapshot.exists()) {
+          // If the document exists, update the state
+          const data = snapshot.data();
+          setUserData({
+            balance: data.balance || 0,
+            invited: data.invited || [],
+            share: data.share || 0,
+            phone: data.phone || "",
+            phoneAccountName: data.phoneAccountName || "", // Added new field
+            name: data.name || "",
+            error: false,
+            validUser: true,
+          });
+          setLoading(false);
+        } else {
+          // If the document doesn't exist, set default values
+          setUserData({
+            balance: 0,
+            invited: [],
+            share: 0,
+            phone: "",
+            phoneAccountName: "",
+            name: "",
+            error: true,
+            validUser: false,
+          });
+          setLoading(true);
+        }
+      },
+      (error: unknown) => {
+        // Handle any errors during the fetch
+        console.error("Error fetching user data:", error);
+        setLoading(true);
+      },
+    );
 
     // Cleanup listener on component unmount
     return () => unsubscribe();
