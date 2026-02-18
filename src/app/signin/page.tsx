@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import { Mail, Lock, ArrowRight, Loader } from "react-feather";
 import { auth } from "@/lib/firebase";
+import { useDirector } from "@/components/Director";
 
 // Reusable Input component with icon
 const IconInput = ({
@@ -13,7 +14,7 @@ const IconInput = ({
   ...props
 }: {
   icon: React.ReactNode;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => (
   <div className="relative">
     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
@@ -33,7 +34,7 @@ export default function Signin() {
     email: "",
     password: "",
   });
-
+  const { notify } = useDirector();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -46,12 +47,11 @@ export default function Signin() {
       router.push("/");
     }
   };
-  useEffect(() => {
-    if (auth?.currentUser?.uid) {
-      router.push("/");
-    }
-  }, []);
 
+  if (auth?.currentUser?.uid) {
+    router.push("/");
+    notify("User Already Signed in: Redirecting", true);
+  }
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-slate-950 font-sans p-4">
       {/* Background effects */}
@@ -126,7 +126,7 @@ export default function Signin() {
           </form>
 
           <div className="mt-8 text-center text-sm text-gray-500">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/signup"
               className="text-yellow-400 hover:text-yellow-300 font-semibold"

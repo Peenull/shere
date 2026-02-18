@@ -21,6 +21,7 @@ import {
   DollarSign,
   TrendingUp,
 } from "react-feather";
+import { useDirector } from "../Director";
 
 interface SharePurchaseDetailModalProps {
   purchase: SharePurchase | null;
@@ -45,6 +46,8 @@ export default function SharePurchaseDetailModal({
   const [editPercentage, setEditPercentage] = useState<string>("");
   const [editPrice, setEditPrice] = useState<string>("");
   const [isEditing, setIsEditing] = useState(false);
+
+  const { notify } = useDirector();
 
   useEffect(() => {
     if (purchase) {
@@ -237,7 +240,25 @@ export default function SharePurchaseDetailModal({
                   <span className="text-gray-400 text-sm flex items-center gap-2">
                     <Smartphone size={14} /> Phone
                   </span>
-                  <span className="text-white font-mono font-medium tracking-wide">
+                  <span
+                    onClick={async () => {
+                      navigator.clipboard.writeText(purchase.phoneNumber).then(
+                        () => {
+                          notify(
+                            `${purchase.phoneNumber} copied to clipboard!`,
+                            true,
+                          );
+                        },
+                        () => {
+                          notify(
+                            `Failed to copy ${purchase.phoneNumber}.`,
+                            false,
+                          );
+                        },
+                      );
+                    }}
+                    className="text-white font-mono font-medium tracking-wide cursor-pointer"
+                  >
                     {purchase.phoneNumber}
                   </span>
                 </div>

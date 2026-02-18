@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import { useUserData } from "@/hooks/useUserData";
@@ -17,12 +17,9 @@ import {
   Share2,
 } from "react-feather";
 import Share from "@/components/Share";
-import { useRouter } from "next/navigation";
-import { useDirector } from "../Director";
 
 const shareText = "Join me on Shere and start earning! Use my link to sign up.";
 const shareTitle = "Join me on Shere!";
-
 const MiniStatCard = ({
   icon,
   title,
@@ -33,7 +30,7 @@ const MiniStatCard = ({
 }: {
   icon: React.ReactNode;
   title: string;
-  value: string;
+  value: number;
   isLoading: boolean;
   color: string;
   url?: string;
@@ -54,7 +51,7 @@ const MiniStatCard = ({
           <div className="w-16 h-6 bg-slate-800 animate-pulse rounded-md"></div>
         ) : (
           <p className="text-xl sm:text-2xl font-black text-white tracking-tight truncate">
-            {value}
+            {value} {title == "Share" && "%"}
           </p>
         )}
       </div>
@@ -63,7 +60,7 @@ const MiniStatCard = ({
         {title === "Share" && (
           <Link
             href="/buy-shares"
-            className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all { value >= 50 && "hidden" }`}
+            className={`w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all ${Number(value) >= 50 && "hidden"}`}
           >
             <Plus size={20} />
           </Link>
@@ -97,11 +94,8 @@ const MiniStatCard = ({
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { balance, invited, share, name, loading, validUser, error } =
-    useUserData();
+  const { balance, invited, share, name, loading } = useUserData();
   const [isBalanceVisible, setIsBalanceVisible] = useState(false);
-  const router = useRouter();
-  const { notify } = useDirector();
 
   // FIX: Derived URL to prevent re-render loops
   const url = useMemo(() => {
@@ -112,24 +106,13 @@ export default function Dashboard() {
   }, [user?.uid]);
 
   function formatBalanceResponsive(value: number) {
-    if (typeof window !== "undefined" && window.innerWidth <= 450) {
-      return new Intl.NumberFormat().format(value);
-    }
+    return new Intl.NumberFormat().format(value);
   }
 
   const getFirstName = (fullName: string | null | undefined): string => {
     if (!fullName) return "User";
     return fullName.split(" ")[0];
   };
-
-  useEffect(() => {
-    if (error) {
-      notify("Failed to Fetch User Data", false);
-    }
-    if (!validUser) {
-      router.push("/signup");
-    }
-  }, [validUser, router, error, notify]);
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white pb-20 selection:bg-yellow-400/30">
@@ -168,7 +151,7 @@ export default function Dashboard() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
         <Link
-          className="fixed bottom-6 z-index-50 items-center gap-2 text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-yellow-400 hover:text-black transition-all"
+          className={`${share >= 50 && "hidden"} fixed z-50 items-center gap-2 text-white-400 bg-yellow-400/70 border border-yellow-400/20 px-4 py-2 rounded-xl font-black text-[15px] uppercase tracking-widest hover:bg-yellow-400 hover:text-black transition-all bottom-4`}
           href="/buy-shares"
         >
           Buy Share
@@ -181,9 +164,14 @@ export default function Dashboard() {
               {getFirstName(name || user?.displayName)}
             </span>
           </h1>
+          <p className="text-gray-500 text-lg font-medium">
+            Your financial ecosystem at a glance.
+          </p>
         </div>
 
+        {/* Main Grid: Responsive column handling */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+          {/* Balance Card: Spans 2 columns on Large screens */}
           <div className="sm:col-span-2 relative overflow-hidden bg-linear-to-br from-slate-900 via-slate-900 to-slate-800 p-6 sm:p-8 max-[450px]:p-4 rounded-4xl border border-gray-800/80 shadow-2xl">
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-400/10 blur-3xl rounded-full"></div>
 
@@ -267,7 +255,7 @@ export default function Dashboard() {
             <MiniStatCard
               icon={<Users size={24} className="text-blue-400" />}
               title="Invites"
-              value={invited.length.toString()}
+              value={invited.length}
               isLoading={loading}
               color="bg-blue-500/10"
               url={url}
@@ -275,7 +263,7 @@ export default function Dashboard() {
             <MiniStatCard
               icon={<PieChart size={24} className="text-yellow-400" />}
               title="Share"
-              value={`${share}%`}
+              value={share}
               isLoading={loading}
               color="bg-yellow-400/10"
             />

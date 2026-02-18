@@ -5,7 +5,7 @@ service cloud.firestore {
 
     // Helper function to check if the requesting user is the admin.
     function isAdmin() {
-      return request.auth.uid == 'V8bQJIh3sLbN9KjOQl3UgQSbtjUY';
+      return request.auth.uid == 'WjYrVmC8Mu6VRMOaqLdgIQT9M5gs';
     }
 
     match /admin/variables {

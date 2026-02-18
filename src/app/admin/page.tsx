@@ -25,9 +25,10 @@ import EditVariablesModal from "@/components/Admin/EditVariablesModal";
 import { doc, updateDoc, createDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useVariablesData } from "@/hooks/useVariablesData";
+import Link from "next/link";
 
-const ADMIN_UID = "WtFZkweX9DZl2iALNKyt3UqfBJA3"; // Your Admin UID
-// const ADMIN_UID = "V8bQJIh3sLbN9KjOQl3UgQSbtjUY";
+// const ADMIN_UID = "WtFZkweX9DZl2iALNKyt3UqfBJA3";
+const ADMIN_UID = "WjYrVmC8Mu6VRMOaqLdgIQT9M5gs";
 
 const AdminDashboardContent = () => {
   const { user: authUser, loading: authLoading } = useAuth();
@@ -164,12 +165,12 @@ const AdminDashboardContent = () => {
             <h1 className="text-xl font-bold tracking-tight">Admin</h1>
           </div>
           <nav className="flex items-center gap-1 bg-slate-800/50 p-1 rounded-lg border border-white/5">
-            <a
+            <Link
               href="/"
               className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-md hover:bg-white/5 text-sm font-medium"
             >
               <Home size={16} />
-            </a>
+            </Link>
           </nav>
         </div>
       </header>
