@@ -20,6 +20,10 @@ import Share from "@/components/Share";
 
 const shareText = "Join me on Shere and start earning! Use my link to sign up.";
 const shareTitle = "Join me on Shere!";
+
+function formatBalanceResponsive(value: number) {
+  return new Intl.NumberFormat().format(value);
+}
 const MiniStatCard = ({
   icon,
   title,
@@ -27,6 +31,7 @@ const MiniStatCard = ({
   isLoading,
   color,
   url,
+  invested,
 }: {
   icon: React.ReactNode;
   title: string;
@@ -34,6 +39,7 @@ const MiniStatCard = ({
   isLoading: boolean;
   color: string;
   url?: string;
+  invested?: number;
 }) => (
   <div className="flex-1 min-w-0 bg-slate-900 p-4 sm:p-6 rounded-3xl border border-gray-800/80 shadow-lg flex items-center transition-all hover:border-gray-700 hover:bg-slate-800/50 group">
     <div className="flex items-center gap-4 w-full">
@@ -50,9 +56,16 @@ const MiniStatCard = ({
         {isLoading ? (
           <div className="w-16 h-6 bg-slate-800 animate-pulse rounded-md"></div>
         ) : (
-          <p className="text-xl sm:text-2xl font-black text-white tracking-tight truncate">
-            {value} {title == "Share" && "%"}
-          </p>
+          <div>
+            <p className="text-xl sm:text-2xl font-black text-white tracking-tight truncate">
+              {value} {title == "Share" && "%"}
+            </p>
+            <p
+              className={`flex items-center gap-2 text-yellow-400 font-black text-[10px] uppercase tracking-widest transition-all ${title != "Share" && "hidden"}`}
+            >
+              {invested} FCFA <span className="italic">Invested</span>
+            </p>
+          </div>
         )}
       </div>
 
@@ -94,7 +107,7 @@ const MiniStatCard = ({
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { balance, invited, share, name, loading } = useUserData();
+  const { balance, invited, share, name, loading, invested } = useUserData();
   const [isBalanceVisible, setIsBalanceVisible] = useState(false);
 
   // FIX: Derived URL to prevent re-render loops
@@ -104,10 +117,6 @@ export default function Dashboard() {
     }
     return "";
   }, [user?.uid]);
-
-  function formatBalanceResponsive(value: number) {
-    return new Intl.NumberFormat().format(value);
-  }
 
   const getFirstName = (fullName: string | null | undefined): string => {
     if (!fullName) return "User";
@@ -230,7 +239,7 @@ export default function Dashboard() {
               <div className="flex gap-2">
                 <Link
                   href="/withdrawal"
-                  className="group flex-1 flex items-center justify-center gap-3 bg-linear-to-r from-yellow-400/10 to-yellow-500/10 text-yellow-400 font-black py-4 px-6 max-[450px]:py-3 max-[450px]:px-3 rounded-2xl active:scale-95 text-xs sm:text-sm uppercase tracking-widest border border-yellow-400/20 min-h-[44px]"
+                  className="group flex-1 flex items-center justify-center gap-3 bg-linear-to-r from-yellow-400/10 to-yellow-500/10 text-yellow-400 font-black py-4 px-6 max-[450px]:py-3 max-[450px]:px-3 rounded-2xl active:scale-95 text-xs sm:text-sm uppercase tracking-widest border border-yellow-400/20 min-h-11"
                 >
                   <span className="truncate">Withdraw</span>
                   <Download
@@ -266,6 +275,7 @@ export default function Dashboard() {
               value={share}
               isLoading={loading}
               color="bg-yellow-400/10"
+              invested={invested}
             />
           </div>
         </div>

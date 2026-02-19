@@ -122,6 +122,7 @@ export const approveSharePurchase = async (
   amount: number,
 ) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await runTransaction(db, async (transaction: any) => {
       const userRef = doc(db, "users", userId);
       const purchaseRef = doc(db, `users/${userId}/sharePurchases`, purchaseId);

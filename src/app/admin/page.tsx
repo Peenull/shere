@@ -22,13 +22,13 @@ import WithdrawalsTable from "@/components/Admin/WithdrawalsTable";
 import ShareRequestsTable from "@/components/Admin/ShareRequestsTable";
 import LoadingScreen from "@/components/LoadingScreen";
 import EditVariablesModal from "@/components/Admin/EditVariablesModal";
-import { doc, updateDoc, createDoc } from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useVariablesData } from "@/hooks/useVariablesData";
 import Link from "next/link";
 
 // const ADMIN_UID = "WtFZkweX9DZl2iALNKyt3UqfBJA3";
-const ADMIN_UID = "WjYrVmC8Mu6VRMOaqLdgIQT9M5gs";
+const ADMIN_UID = "S7VnMZof1k9v1zKYeMjsSjomuTUV";
 
 const AdminDashboardContent = () => {
   const { user: authUser, loading: authLoading } = useAuth();
@@ -103,6 +103,7 @@ const AdminDashboardContent = () => {
     setSelectedUser(user);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleEditVariables = async (formData: any) => {
     const variablesRef = doc(db, "admin/variables");
     try {
@@ -115,6 +116,7 @@ const AdminDashboardContent = () => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSaveNewUser = async (formData: any) => {
     const { success, error } = await addUser(formData);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
@@ -10,7 +10,6 @@ import {
   resetSharePurchaseStatus,
 } from "@/lib/firebase/shareService";
 import {
-  Check,
   X,
   Users,
   PieChart,
@@ -18,7 +17,6 @@ import {
   AlertCircle,
   Smartphone,
   Edit3,
-  DollarSign,
   TrendingUp,
 } from "react-feather";
 import { useDirector } from "../Director";
@@ -34,6 +32,7 @@ export default function SharePurchaseDetailModal({
   onClose,
   onUpdate,
 }: SharePurchaseDetailModalProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userData, setUserData] = useState<any>(null);
   const [loadingUser, setLoadingUser] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -92,7 +91,23 @@ export default function SharePurchaseDetailModal({
         parseFloat(editPrice),
       );
       onUpdate();
+      const successMessage = `Hello ${userData.name}\n\n Your Request to buy shares of ${purchase.percentage.toString()}% for ${purchase.amount.toString()} FCFA was successful. Thank you for trusting SHERE.`;
+      await navigator
+        .share({
+          title: "Successful Transaction.",
+          text: successMessage,
+          url: `${window.location.origin}`,
+        })
+        .then(() => {
+          onClose();
+        })
+        .catch((e) => {
+          console.error(e);
+          navigator.clipboard.writeText(successMessage);
+          onClose();
+        });
       onClose();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       console.error(e);
       alert(e.message || "Approval failed.");
@@ -109,7 +124,21 @@ export default function SharePurchaseDetailModal({
     try {
       await rejectSharePurchase(purchase.userId, purchase.id, reason);
       onUpdate();
-      onClose();
+      const rejectionMessage = `Hello ${userData.name}\n\n Your Request to Buy Shares of ${purchase.percentage.toString()}% for ${purchase.amount.toString()} FCFA has failed. \n\n Reason: ${reason}`;
+      await navigator
+        .share({
+          title: "Failed Transaction.",
+          text: rejectionMessage,
+          url: `${window.location.origin}`,
+        })
+        .then(() => {
+          onClose();
+        })
+        .catch((e) => {
+          console.error(e);
+          navigator.clipboard.writeText(rejectionMessage);
+          onClose();
+        });
     } catch (e) {
       console.error(e);
       alert("Rejection failed.");
@@ -413,7 +442,7 @@ export default function SharePurchaseDetailModal({
               <p className="text-gray-400 text-sm mb-8 px-6">
                 Confirming will add{" "}
                 <span className="text-white font-bold">+{editPercentage}%</span>{" "}
-                to the user's stake and add{" "}
+                to the user&apos;s stake and add{" "}
                 <span className="text-white font-bold">
                   {parseFloat(editPrice).toLocaleString()} FCFA
                 </span>{" "}

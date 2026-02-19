@@ -16,6 +16,7 @@ export const useUserData = () => {
     name: "",
     error: false,
     validUser: true,
+    invested: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -31,10 +32,12 @@ export const useUserData = () => {
     // Set up the real-time listener
     const unsubscribe = onSnapshot(
       userDocRef,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (snapshot: any) => {
         if (snapshot.exists()) {
           // If the document exists, update the state
           const data = snapshot.data();
+          console.log("Full User Data: ", data);
           setUserData({
             balance: data.balance || 0,
             invited: data.invited || [],
@@ -44,6 +47,7 @@ export const useUserData = () => {
             name: data.name || "",
             error: false,
             validUser: true,
+            invested: data.invested,
           });
           setLoading(false);
         } else {
@@ -57,6 +61,7 @@ export const useUserData = () => {
             name: "",
             error: true,
             validUser: false,
+            invested: 0,
           });
           setLoading(true);
         }

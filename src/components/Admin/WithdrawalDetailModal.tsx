@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Withdrawal } from "@/types";
@@ -30,6 +30,7 @@ export default function WithdrawalDetailModal({
   onClose,
   onUpdate,
 }: WithdrawalDetailModalProps) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userData, setUserData] = useState<any>(null);
   const [loadingUser, setLoadingUser] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -78,6 +79,21 @@ export default function WithdrawalDetailModal({
         withdrawal.amount,
       );
       onUpdate();
+      const successMessage = `Hello ${userData.name}\n\n Your Request to withdraw  ${withdrawal.amount.toString()} FCFA was successful. Thank you for trusting SHERE.`;
+      await navigator
+        .share({
+          title: "Successful Transaction.",
+          text: successMessage,
+          url: `${window.location.origin}`,
+        })
+        .then(() => {
+          onClose();
+        })
+        .catch((e) => {
+          console.error(e);
+          navigator.clipboard.writeText(successMessage);
+          onClose();
+        });
       onClose();
     } catch (e) {
       console.error(e);
@@ -95,6 +111,21 @@ export default function WithdrawalDetailModal({
     try {
       await rejectWithdrawal(withdrawal.userId, withdrawal.id, reason);
       onUpdate();
+      const rejectionMessage = `Hello ${userData.name}\n\n Your Request to Withdraw an Amount of ${withdrawal.amount.toString()} FCFA has failed. \n\n Reason: ${reason}`;
+      await navigator
+        .share({
+          title: "Failed Transaction.",
+          text: rejectionMessage,
+          url: `${window.location.origin}`,
+        })
+        .then(() => {
+          onClose();
+        })
+        .catch((e) => {
+          console.error(e);
+          navigator.clipboard.writeText(rejectionMessage);
+          onClose();
+        });
       onClose();
     } catch (e) {
       console.error(e);
@@ -204,7 +235,7 @@ export default function WithdrawalDetailModal({
                     </div>
                     <div className="p-4 bg-slate-900 rounded-xl border border-slate-800/80">
                       <p className="text-xs text-gray-500 mb-1">
-                        Account Name (MOMO)
+                        Account Name (MOMO Name)
                       </p>
                       <p
                         className="font-bold text-white truncate text-sm"

@@ -77,10 +77,11 @@ export default function SignupForm() {
     }
   }, [searchParams]);
 
-  if (auth?.currentUser?.uid) {
-    router.push("/");
-    notify("User Already Signed in: Redirecting", true);
-  }
+  useEffect(() => {
+    if (auth?.currentUser?.uid) {
+      router.push("/");
+    }
+  }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
