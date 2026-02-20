@@ -66,7 +66,7 @@ const MiniStatCard = ({
               className={`flex items-center gap-2 text-yellow-400 font-black text-[10px] uppercase tracking-widest transition-all ${title != "Share" && "hidden"}`}
             >
               {formatMoney(invested || 0) || 0} FCFA
-              <p className="italic">Invested</p>
+              <span className="italic">Invested</span>
             </p>
           </div>
         )}

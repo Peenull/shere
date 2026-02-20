@@ -28,7 +28,7 @@ import { useVariablesData } from "@/hooks/useVariablesData";
 import Link from "next/link";
 
 const ADMIN_UID = "WtFZkweX9DZl2iALNKyt3UqfBJA3";
-// const ADMIN_UID = "S7VnMZof1k9v1zKYeMjsSjomuTUV";
+// const ADMIN_UID = "cRTpyTDQMha4A4gnOrVtrZlunffM";
 
 const AdminDashboardContent = () => {
   const { user: authUser, loading: authLoading } = useAuth();

@@ -37,7 +37,6 @@ export const useUserData = () => {
         if (snapshot.exists()) {
           // If the document exists, update the state
           const data = snapshot.data();
-          console.log("Full User Data: ", data);
           setUserData({
             balance: data.balance || 0,
             invited: data.invited || [],
