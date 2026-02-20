@@ -22,6 +22,7 @@ import {
 } from "react-feather";
 import { useVariablesData } from "@/hooks/useVariablesData";
 import { checkPending } from "@/lib/firebase/checkPending";
+import { Withdrawal } from "@/types";
 
 export default function BuySharesPage() {
   const { user } = useAuth();
@@ -45,7 +46,7 @@ export default function BuySharesPage() {
   const [hasAccountName, setHasAccountName] = useState(false);
   const { number, numberName, PPP } = useVariablesData();
 
-  const [pendingList, setPendingList] = useState([]);
+  const [pendingList, setPendingList] = useState<Withdrawal[]>([]);
 
   useEffect(() => {
     if (existingAccountName) {
@@ -56,12 +57,13 @@ export default function BuySharesPage() {
 
   useEffect(() => {
     const getList = async () => {
-      const list = await checkPending(user?.uid, false);
+      const list = await checkPending(user?.uid || "", false);
       console.log(list);
       setPendingList(list);
     };
     getList();
-  }, []);
+  }, [user?.uid]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "-";
     if (timestamp.toDate) return timestamp.toDate().toLocaleString();
@@ -159,7 +161,7 @@ export default function BuySharesPage() {
           <div>
             {pendingList.map((p) => (
               <>
-                <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-6 rounded-2xl mb-6 shadow-lg">
+                <div className="bg-linear-to-br from-slate-900 to-slate-950 border border-slate-800 p-6 rounded-2xl mb-6 shadow-lg">
                   <p className="text-2xl font-black text-red-600">
                     Pending Purchase.
                   </p>

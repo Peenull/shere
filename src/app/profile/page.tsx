@@ -23,6 +23,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 const ProfilePage = () => {
   const { user, signOut } = useAuth();
   const { notify } = useDirector();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userData, setUserData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,6 +42,7 @@ const ProfilePage = () => {
       } else {
         notify("User data not found.", false);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       notify("Failed to fetch user data.", false);
     } finally {
@@ -123,7 +125,7 @@ const ProfilePage = () => {
           <div className="bg-slate-900/70 backdrop-blur-xl border border-gray-800/50 rounded-2xl p-6 sm:p-8 shadow-2xl">
             <div className="flex flex-col sm:flex-row justify-between items-start gap-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-yellow-400/20 flex items-center justify-center border-2 border-yellow-400 flex-shrink-0">
+                <div className="w-16 h-16 rounded-full bg-yellow-400/20 flex items-center justify-center border-2 border-yellow-400 shrink-0">
                   <User size={32} className="text-yellow-300" />
                 </div>
                 <div className="grow">
@@ -145,7 +147,7 @@ const ProfilePage = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => setIsModalOpen(true)}
                   className="flex items-center gap-2 py-2 px-4 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors"

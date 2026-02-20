@@ -26,6 +26,7 @@ export const requestWithdrawal = async (
       userId,
       amount,
       status: "pending",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dateRequested: serverTimestamp() as any,
       phoneAccountName,
       phoneNumber,
@@ -51,6 +52,7 @@ export const approveWithdrawal = async (
   amount: number,
 ) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await runTransaction(db, async (transaction: any) => {
       const userRef = doc(db, "users", userId);
       const withdrawalRef = doc(
@@ -117,11 +119,13 @@ export const rejectWithdrawal = async (
 // Admin Fetching
 export const getWithdrawals = async (
   status: WithdrawalStatus,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lastDoc?: any,
   pageSize: number = 10,
 ) => {
   try {
     // collectionGroup allows querying all subcollections named 'withdrawals'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const constraints: any[] = [where("status", "==", status)];
 
     constraints.push(orderBy("completeDate", "desc")); // Most recent completions first
@@ -136,6 +140,7 @@ export const getWithdrawals = async (
     const snapshot = await getDocs(q);
 
     const withdrawals: Withdrawal[] = snapshot.docs.map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (doc: any) =>
         ({
           id: doc.id,
@@ -161,6 +166,7 @@ export const getUserWithdrawals = async (userId: string) => {
     );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (doc: any) =>
         ({
           id: doc.id,

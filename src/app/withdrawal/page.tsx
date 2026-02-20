@@ -17,6 +17,7 @@ import {
 } from "react-feather";
 import LoadingScreen from "@/components/LoadingScreen";
 import { checkPending } from "@/lib/firebase/checkPending";
+import { Withdrawal } from "@/types";
 
 export default function WithdrawalPage() {
   const { user } = useAuth();
@@ -39,7 +40,7 @@ export default function WithdrawalPage() {
   const [promptMessage] = useState(
     "You need a balance to make a withdrawal. Start sharing your link to earn money!",
   );
-  const [pendingList, setPendingList] = useState([]);
+  const [pendingList, setPendingList] = useState<Withdrawal[]>([]);
   // Local state to track if account name is set in DB or just entered
   const [hasAccountName, setHasAccountName] = useState(false);
 
@@ -52,12 +53,12 @@ export default function WithdrawalPage() {
 
   useEffect(() => {
     const getList = async () => {
-      const list = await checkPending(user?.uid, true);
+      const list = await checkPending(user?.uid || "", true);
       console.log(list);
       setPendingList(list);
     };
     getList();
-  }, []);
+  }, [user?.uid]);
   const handleSetAccountName = async () => {
     if (!accountName.trim() || !user) return;
     setIsSubmitting(true);
@@ -132,6 +133,7 @@ export default function WithdrawalPage() {
   }
 
   // State 2: Zero Balance - Show "Share & Earn"
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "-";
     if (timestamp.toDate) return timestamp.toDate().toLocaleString();
@@ -178,7 +180,7 @@ export default function WithdrawalPage() {
           <div>
             {pendingList.map((p) => (
               <>
-                <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-6 rounded-2xl mb-6 shadow-lg">
+                <div className="bg-linear-to-br from-slate-900 to-slate-950 border border-slate-800 p-6 rounded-2xl mb-6 shadow-lg">
                   <p className="text-2xl font-black text-red-600">
                     Pending Withdrawals.
                   </p>
@@ -258,7 +260,7 @@ export default function WithdrawalPage() {
               </div>
             ) : (
               <>
-                <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-6 rounded-2xl mb-6 shadow-lg">
+                <div className="bg-linear-to-br from-slate-900 to-slate-950 border border-slate-800 p-6 rounded-2xl mb-6 shadow-lg">
                   <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-1">
                     Available Balance
                   </p>
@@ -297,7 +299,7 @@ export default function WithdrawalPage() {
                       <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
                         <AlertCircle
                           size={12}
-                          className="mt-0.5 flex-shrink-0"
+                          className="mt-0.5 shrink-0"
                         />
                         This name must match your Mobile Money account. It
                         cannot be changed later without admin support.
