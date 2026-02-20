@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import { useUserData } from "@/hooks/useUserData";
@@ -17,13 +17,15 @@ import {
   Share2,
 } from "react-feather";
 import Share from "@/components/Share";
+import { useDirector } from "../Director";
 
 const shareText = "Join me on Shere and start earning! Use my link to sign up.";
 const shareTitle = "Join me on Shere!";
 
-function formatBalanceResponsive(value: number) {
+function formatMoney(value: number) {
   return new Intl.NumberFormat().format(value);
 }
+
 const MiniStatCard = ({
   icon,
   title,
@@ -63,7 +65,8 @@ const MiniStatCard = ({
             <p
               className={`flex items-center gap-2 text-yellow-400 font-black text-[10px] uppercase tracking-widest transition-all ${title != "Share" && "hidden"}`}
             >
-              {invested} FCFA <span className="italic">Invested</span>
+              {formatMoney(invested || 0) || 0} FCFA
+              <p className="italic">Invested</p>
             </p>
           </div>
         )}
@@ -118,10 +121,39 @@ export default function Dashboard() {
     return "";
   }, [user?.uid]);
 
+  const { notify } = useDirector();
+
   const getFirstName = (fullName: string | null | undefined): string => {
     if (!fullName) return "User";
     return fullName.split(" ")[0];
   };
+
+  function seeingBalance(change: boolean = false, see?: boolean) {
+    if (change) {
+      if (see) {
+        localStorage.setItem("seeBalance", "true");
+        setIsBalanceVisible(true);
+      } else {
+        localStorage.setItem("seeBalance", "false");
+        setIsBalanceVisible(false);
+      }
+    } else {
+      const seeBalance = localStorage.getItem("seeBalance");
+
+      if (seeBalance) {
+        const seeBalanceParsed = JSON.parse(seeBalance);
+        return seeBalanceParsed == true;
+      } else {
+        localStorage.setItem("seeBalance", "false");
+        return false;
+      }
+    }
+  }
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    const see = seeingBalance(false, false);
+    setIsBalanceVisible(see || false);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-white pb-20 selection:bg-yellow-400/30">
@@ -207,8 +239,8 @@ export default function Dashboard() {
                           }
                         >
                           <span className="inline-block min-w-0 truncate">
-                            {isBalanceVisible
-                              ? formatBalanceResponsive(balance)
+                            {seeingBalance(false, false)
+                              ? formatMoney(balance)
                               : "••••••"}
                           </span>
                         </p>
@@ -221,7 +253,9 @@ export default function Dashboard() {
 
                     {/* Toggle */}
                     <button
-                      onClick={() => setIsBalanceVisible(!isBalanceVisible)}
+                      onClick={() =>
+                        seeingBalance(true, !seeingBalance(false, false))
+                      }
                       aria-label="Toggle balance visibility"
                       className="ml-3 flex-none inline-flex items-center justify-center p-2.5 max-[450px]:p-2 bg-slate-800/70 hover:bg-slate-800/60 active:scale-95 rounded-xl border border-slate-700/50 text-gray-300 transition"
                     >
@@ -238,7 +272,12 @@ export default function Dashboard() {
               {/* Actions row unchanged structurally but slightly tuned for tiny screens */}
               <div className="flex gap-2">
                 <Link
-                  href="/withdrawal"
+                  href={balance > 0 ? "/withdrawal" : "#"}
+                  onClick={() => {
+                    if (balance < 1) {
+                      notify("You do not have Enough Balance.", false);
+                    }
+                  }}
                   className="group flex-1 flex items-center justify-center gap-3 bg-linear-to-r from-yellow-400/10 to-yellow-500/10 text-yellow-400 font-black py-4 px-6 max-[450px]:py-3 max-[450px]:px-3 rounded-2xl active:scale-95 text-xs sm:text-sm uppercase tracking-widest border border-yellow-400/20 min-h-11"
                 >
                   <span className="truncate">Withdraw</span>
