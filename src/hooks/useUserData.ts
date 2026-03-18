@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase"; // Corrected import path
+import { updateDoc } from "firebase/firestore";
 
 export const useUserData = () => {
   const { user } = useAuth();
@@ -17,8 +18,14 @@ export const useUserData = () => {
     error: false,
     validUser: true,
     invested: 0,
+    message: "",
   });
   const [loading, setLoading] = useState(true);
+
+  const closeMessage = async () => {
+    const userDocRef = doc(db, "users", user?.uid);
+    await updateDoc(userDocRef, { message: null });
+  };
 
   useEffect(() => {
     if (!user?.uid) {
@@ -27,7 +34,7 @@ export const useUserData = () => {
     }
 
     // Reference to the user's document in the 'users' collection
-    const userDocRef = doc(db, "users", user.uid);
+    const userDocRef = doc(db, "users", user?.uid);
 
     // Set up the real-time listener
     const unsubscribe = onSnapshot(
@@ -47,6 +54,7 @@ export const useUserData = () => {
             error: false,
             validUser: true,
             invested: data.invested,
+            message: data.message || "",
           });
           setLoading(false);
         } else {
@@ -61,6 +69,7 @@ export const useUserData = () => {
             error: true,
             validUser: false,
             invested: 0,
+            message: "",
           });
           setLoading(true);
         }
@@ -76,5 +85,5 @@ export const useUserData = () => {
     return () => unsubscribe();
   }, [user]);
 
-  return { ...userData, loading };
+  return { ...userData, loading, closeMessage };
 };

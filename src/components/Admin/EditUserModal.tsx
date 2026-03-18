@@ -1,43 +1,53 @@
 "use client";
 
+import { UserData } from "@/hooks/useAdminData";
 import React, { useState } from "react";
 import { X } from "react-feather";
 
-interface AddUserModalProps {
+interface EditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (formData: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onUpdate: (formData: any) => void;
   isLoading: boolean;
+  user: UserData;
 }
 
 const inputStyle =
   "w-full p-3 bg-slate-900/80 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all placeholder:text-slate-500";
 
-const AddUserModal: React.FC<AddUserModalProps> = ({
+const EditUserModal: React.FC<EditUserModalProps> = ({
+  user,
   isOpen,
   onClose,
-  onSave,
+  onUpdate,
   isLoading,
 }) => {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    phone: "",
-    country: "",
-    referredBy: "",
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    country: user.country,
+    referredBy: user.referredBy,
+    balance: user.balance,
+    invested: user.invested,
+    share: user.share,
   });
 
   if (!isOpen) return null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    if (type == "number") {
+      setFormData((prev) => ({ ...prev, [name]: Number(value) }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onUpdate(formData);
   };
 
   return (
@@ -63,6 +73,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 Full Name
               </label>
               <input
+                value={formData.name}
                 type="text"
                 name="name"
                 onChange={handleInputChange}
@@ -75,6 +86,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 Email Address
               </label>
               <input
+                value={formData.email}
                 type="email"
                 name="email"
                 onChange={handleInputChange}
@@ -84,21 +96,10 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-300">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                onChange={handleInputChange}
-                className={inputStyle}
-                placeholder="••••••••"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-300">
                 Phone Number
               </label>
               <input
+                value={formData.phone}
                 type="text"
                 name="phone"
                 onChange={handleInputChange}
@@ -108,9 +109,50 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-300">
+                Balance
+              </label>
+              <input
+                value={formData.balance}
+                type="number"
+                name="balance"
+                onChange={handleInputChange}
+                className={inputStyle}
+                placeholder="e.g., 1000"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-300">
+                Invested
+              </label>
+              <input
+                value={formData.invested}
+                type="number"
+                name="invested"
+                onChange={handleInputChange}
+                className={inputStyle}
+                placeholder="e.g., 1000"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-300">
+                Shares
+              </label>
+              <input
+                value={formData.share}
+                type="number"
+                name="share"
+                onChange={handleInputChange}
+                className={inputStyle}
+                placeholder="e.g., 50"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-300">
                 Country
               </label>
               <input
+                value={formData.country}
                 type="text"
                 name="country"
                 onChange={handleInputChange}
@@ -118,12 +160,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 placeholder="e.g., USA"
               />
             </div>
-
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-slate-300">
                 Referred By (UID)
               </label>
               <input
+                value={formData.referredBy}
                 type="text"
                 name="referredBy"
                 onChange={handleInputChange}
@@ -145,7 +187,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
               disabled={isLoading}
               className="py-2 px-5 text-sm font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-lg transition-colors"
             >
-              {isLoading ? "Creating User..." : "Create User"}
+              {isLoading ? "Updating..." : "Update"}
             </button>
           </div>
         </form>
@@ -154,4 +196,4 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
   );
 };
 
-export default AddUserModal;
+export default EditUserModal;

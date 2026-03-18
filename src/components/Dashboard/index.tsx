@@ -18,8 +18,11 @@ import {
 } from "react-feather";
 import Share from "@/components/Share";
 import { useDirector } from "../Director";
+import Message from "@/components/Notification/Message";
+import { useVariablesData } from "@/hooks/useVariablesData";
 
-const shareText = "Join me on Shere and start earning! Use my link to sign up.";
+const shareText =
+  "Join me on Shere and start earning today! Use my link to sign up.";
 const shareTitle = "Join me on Shere!";
 
 function formatMoney(value: number) {
@@ -110,8 +113,18 @@ const MiniStatCard = ({
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { balance, invited, share, name, loading, invested } = useUserData();
+  const {
+    balance,
+    invited,
+    share,
+    name,
+    loading,
+    invested,
+    message,
+    closeMessage,
+  } = useUserData();
   const [isBalanceVisible, setIsBalanceVisible] = useState(false);
+  const { PPP } = useVariablesData();
 
   // FIX: Derived URL to prevent re-render loops
   const url = useMemo(() => {
@@ -189,14 +202,27 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
-
+      {message && (
+        <>
+          <Message message={message} closeMessage={closeMessage} />{" "}
+        </>
+      )}
       <main className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
         <Link
-          className={`${share >= 50 && "hidden"} fixed z-50 items-center gap-2 text-white-400 bg-yellow-400/70 border border-yellow-400/20 px-4 py-2 rounded-xl font-black text-[15px] uppercase tracking-widest hover:bg-yellow-400 hover:text-black transition-all bottom-4`}
           href="/buy-shares"
+          className={`${
+            share >= 50 && "hidden"
+          } fixed bottom-5 right-5 z-50 flex flex-col items-center px-4 py-2 rounded-xl text-sm uppercase tracking-wider font-bold cursor-pointer
+     bg-linear-to-r from-yellow-300/80 to-yellow-400/80 text-gray-900
+     border-2 border-yellow-500
+     shadow-md shadow-yellow-400/50
+     hover:scale-105 hover:shadow-yellow-500/70 transition-all duration-300
+     animate-pulse`}
         >
-          Buy Share
+          <span className="text-green-700 font-semibold">1% = {PPP} FCFA</span>
+          <span className="mt-1 animate-bounce text-red-700">BUY NOW</span>
         </Link>
+
         {/* Welcome Section */}
         <div className="mb-10 lg:mb-14">
           <h1 className="text-4xl sm:text-6xl font-black tracking-tighter mb-2">

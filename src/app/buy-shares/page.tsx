@@ -157,7 +157,7 @@ export default function BuySharesPage() {
           <h1 className="text-2xl font-bold">Buy More Shares</h1>
         </header>
 
-        {pendingList.length > 0 ? (
+        {pendingList?.length > 0 ? (
           <div>
             {pendingList.map((p) => (
               <>

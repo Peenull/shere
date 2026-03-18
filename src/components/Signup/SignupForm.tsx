@@ -59,8 +59,6 @@ export default function SignupForm() {
     email: "",
     phone: "",
     country: "",
-    currency: "",
-    language: "English",
     referredBy: "",
     phoneAccountName: "",
     password: "",
@@ -88,12 +86,8 @@ export default function SignupForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePhoneChange = (
-    phone: string,
-    country: string,
-    currency: string,
-  ) => {
-    setFormData((prev) => ({ ...prev, phone, country, currency }));
+  const handlePhoneChange = (phone: string, country: string) => {
+    setFormData((prev) => ({ ...prev, phone, country }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -130,8 +124,6 @@ export default function SignupForm() {
           email: formData.email,
           phone: formData.phone,
           country: formData.country,
-          currency: formData.currency,
-          language: formData.language,
           referredBy: formData.referredBy,
           createdAt: serverTimestamp(), // Use server timestamp for accuracy
           invited: [],

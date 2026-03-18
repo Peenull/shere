@@ -28,7 +28,7 @@ import { useVariablesData } from "@/hooks/useVariablesData";
 import Link from "next/link";
 
 const ADMIN_UID = "WtFZkweX9DZl2iALNKyt3UqfBJA3";
-// const ADMIN_UID = "cRTpyTDQMha4A4gnOrVtrZlunffM";
+// const ADMIN_UID = "OrU7utQAqA5JOfKPY3usF9z33KEE";
 
 const AdminDashboardContent = () => {
   const { user: authUser, loading: authLoading } = useAuth();
@@ -401,7 +401,7 @@ const AdminDashboardContent = () => {
 
       <ViewUserModal
         isOpen={isViewModalOpen}
-        user={selectedUser}
+        userId={selectedUser?.uid || null}
         onClose={() => setIsViewModalOpen(false)}
         onInvest={openInvestModal}
         onDelete={openDeleteModal}

@@ -1,47 +1,40 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { X } from "react-feather";
 
-interface EditVariablesModalProps {
+interface MessageUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onSave: (formData: any) => void;
+  onSend: (formData: any) => void;
   isLoading: boolean;
-  variables: { number: string; numberName: string; PPP: number };
 }
 
 const inputStyle =
   "w-full p-3 bg-slate-900/80 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all placeholder:text-slate-500";
 
-const EditVariablesModal: React.FC<EditVariablesModalProps> = ({
+const MessageUserModal: React.FC<MessageUserModalProps> = ({
   isOpen,
   onClose,
-  onSave,
+  onSend,
   isLoading,
-  variables: variables,
 }) => {
-  const [formData, setFormData] = useState({
-    PPP: 200,
-    number: "683583297",
-    numberName: "RIVANO DESTIN NGUEFACK",
-  });
-
-  useEffect(() => {
-    setFormData(() => variables);
-  }, [variables]);
+  const [text, setText] = useState("");
+  const [good, setGood] = useState<boolean>(true);
+  const [transaction, setTransaction] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    onSend({
+      message: {
+        text,
+        good,
+        transaction,
+      },
+    });
   };
 
   return (
@@ -52,7 +45,7 @@ const EditVariablesModal: React.FC<EditVariablesModalProps> = ({
       ></div>
       <div className="relative w-full max-w-2xl bg-slate-800/70 border border-slate-700 rounded-2xl shadow-xl backdrop-blur-xl">
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
-          <h2 className="text-xl font-bold text-white">Edit Variables</h2>
+          <h2 className="text-xl font-bold text-white">Send Message.</h2>
           <button
             onClick={onClose}
             className="p-1 text-slate-400 hover:text-white hover:bg-slate-700 rounded-full transition-colors"
@@ -63,43 +56,35 @@ const EditVariablesModal: React.FC<EditVariablesModalProps> = ({
         <form onSubmit={handleSubmit}>
           <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-300">
-                MOMO / OM Name
-              </label>
+              <label className="text-sm font-medium text-slate-300">Text</label>
               <input
+                value={text}
                 type="text"
-                name="numberName"
-                onChange={handleInputChange}
+                name="text"
+                onChange={(e) => setText(e.target.value)}
                 className={inputStyle}
-                placeholder="John Doe"
-                value={formData.numberName}
+                placeholder="Hello User."
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-300">
-                Phone Number
-              </label>
-              <input
-                type="text"
-                name="number"
-                onChange={handleInputChange}
-                className={inputStyle}
-                placeholder="+237677777777"
-                value={formData.number}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-slate-300">
-                Price Per Persentage (PPP)
-              </label>
-              <input
-                type="number"
-                name="PPP"
-                onChange={handleInputChange}
-                className={inputStyle}
-                placeholder="200"
-                value={formData.PPP}
-              />
+            <div className="flex w-full gap-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setGood(!good);
+                }}
+                className={`flex items-center gap-2 py-2 px-4 text-sm font-semibold text-white ${good ? "bg-green-600/80" : "bg-red-600/80"} rounded-lg transition-colors w-full`}
+              >
+                <span>{good ? "GOOD" : "BAD"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTransaction(!transaction);
+                }}
+                className="flex items-center gap-2 py-2 px-4 text-sm font-semibold text-white bg-green-600/80 hover:bg-green-600 rounded-lg transition-colors w-full"
+              >
+                <span>{transaction ? "Trasaction" : "No Trasaction"}</span>
+              </button>
             </div>
           </div>
           <div className="flex justify-end items-center gap-4 p-6 border-t border-slate-700">
@@ -115,7 +100,7 @@ const EditVariablesModal: React.FC<EditVariablesModalProps> = ({
               disabled={isLoading}
               className="py-2 px-5 text-sm font-bold text-black bg-yellow-400 hover:bg-yellow-300 rounded-lg transition-colors"
             >
-              {isLoading ? "Updating..." : "Update"}
+              {isLoading ? "Sending..." : "Send"}
             </button>
           </div>
         </form>
@@ -124,4 +109,4 @@ const EditVariablesModal: React.FC<EditVariablesModalProps> = ({
   );
 };
 
-export default EditVariablesModal;
+export default MessageUserModal;

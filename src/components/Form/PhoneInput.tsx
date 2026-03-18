@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { COUNTRIES, Country } from './countries';
+import React, { useState, useRef, useEffect, useMemo } from "react";
+import { COUNTRIES, Country } from "./countries";
 
 function stripToDigits(str: string): string {
-  return str.replace(/\D/g, '');
+  return str.replace(/\D/g, "");
 }
 
 function findCountry(dialCode: string): Country | undefined {
@@ -30,37 +30,45 @@ function findCountryByPhone(phone: string): Country {
 interface PhoneInputProps {
   label: string;
   value?: string;
-  onChange?: (phone: string, country: string, currency: string) => void;
+  onChange?: (phone: string, country: string) => void;
   className?: string;
   required?: boolean;
 }
 
 export default function PhoneInput({
   label,
-  value = '',
+  value = "",
   onChange,
   className,
   required,
 }: PhoneInputProps) {
-  const [country, setCountry] = useState<Country>(() => findCountryByPhone(value));
+  const [country, setCountry] = useState<Country>(() =>
+    findCountryByPhone(value),
+  );
   const [local, setLocal] = useState<string>(() =>
-    value ? stripToDigits(value).substring(country.dialCode.length) : ''
+    value ? stripToDigits(value).substring(country.dialCode.length) : "",
   );
   const [error, setError] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const selectedCountry = useMemo(() => findCountry(country.dialCode) || COUNTRIES[0], [country]);
+  const selectedCountry = useMemo(
+    () => findCountry(country.dialCode) || COUNTRIES[0],
+    [country],
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -78,9 +86,8 @@ export default function PhoneInput({
 
   function emitChange(nextLocal: string, nextCountry = country) {
     const cleaned = stripToDigits(nextLocal);
-    const finalPhone = cleaned ? `+${nextCountry.dialCode}${cleaned}` : '';
+    const finalPhone = cleaned ? `+${nextCountry.dialCode}${cleaned}` : "";
     const finalCountryName = nextCountry.name;
-    const finalCurrency = nextCountry.currency;
 
     if (nextCountry.expectedLength != null) {
       if (cleaned.length === 0) {
@@ -92,7 +99,7 @@ export default function PhoneInput({
       }
     }
 
-    onChange?.(finalPhone, finalCountryName, finalCurrency);
+    onChange?.(finalPhone, finalCountryName);
   }
 
   return (
@@ -136,9 +143,9 @@ export default function PhoneInput({
             type="tel"
             value={local}
             onChange={handleLocalChange}
-            placeholder={selectedCountry.placeholder || ''}
+            placeholder={selectedCountry.placeholder || ""}
             className={`${className} rounded-l-none rounded-r-lg pl-14`}
-            autoComplete='tel'
+            autoComplete="tel"
           />
         </div>
       </div>

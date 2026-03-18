@@ -35,11 +35,11 @@ export const requestWithdrawal = async (
     };
 
     // We should add it to the user's subcollection
-    const docRef = await addDoc(
+    const docData = await addDoc(
       collection(db, `users/${userId}/withdrawals`),
       withdrawalData,
     );
-    return docRef.id;
+    return docData.id;
   } catch (error) {
     console.error("Error requesting withdrawal:", error);
     throw error;
@@ -83,6 +83,11 @@ export const approveWithdrawal = async (
       // Deduct balance
       transaction.update(userRef, {
         balance: currentBalance - amount,
+        message: {
+          text: `You have successfully withdrawn ${amount} FCFA from your SHERE account.`,
+          good: true,
+          transaction: true,
+        },
       });
 
       // Update withdrawal status
@@ -102,12 +107,21 @@ export const rejectWithdrawal = async (
   userId: string,
   withdrawalId: string,
   reason: string,
+  amount: number,
 ) => {
   try {
     const withdrawalRef = doc(db, `users/${userId}/withdrawals`, withdrawalId);
+    const userRef = doc(db, "users", userId);
     await updateDoc(withdrawalRef, {
       status: "rejected",
       rejectionReason: reason,
+    });
+    await updateDoc(userRef, {
+      message: {
+        text: `Your Request to withdraw ${amount} FCFA has FAILED. Reason: ${reason}`,
+        good: true,
+        transaction: true,
+      },
     });
     return true;
   } catch (error) {

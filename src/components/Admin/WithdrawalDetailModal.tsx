@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { Withdrawal } from "@/types";
 import {
   Check,
@@ -18,6 +16,7 @@ import {
   resetWithdrawalStatus,
 } from "@/lib/firebase/withdrawalService";
 import { useDirector } from "../Director";
+import { useAdminData } from "@/hooks/useAdminData";
 
 interface WithdrawalDetailModalProps {
   withdrawal: Withdrawal | null;
@@ -30,9 +29,7 @@ export default function WithdrawalDetailModal({
   onClose,
   onUpdate,
 }: WithdrawalDetailModalProps) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [userData, setUserData] = useState<any>(null);
-  const [loadingUser, setLoadingUser] = useState(false);
+  const { user } = useAdminData(withdrawal?.userId);
   const [processing, setProcessing] = useState(false);
   const [rejectReason, setRejectReason] = useState("Insufficient balance");
   const [customReason, setCustomReason] = useState("");
@@ -42,27 +39,13 @@ export default function WithdrawalDetailModal({
 
   useEffect(() => {
     if (withdrawal) {
-      fetchUserData(withdrawal.userId);
+      // fetchuser(withdrawal.userId);
       setIsRejecting(false);
       setRejectReason("Insufficient balance");
       setCustomReason("");
       setIsConfirmingApprove(false);
     }
   }, [withdrawal]);
-
-  const fetchUserData = async (uid: string) => {
-    setLoadingUser(true);
-    try {
-      const userDoc = await getDoc(doc(db, "users", uid));
-      if (userDoc.exists()) {
-        setUserData(userDoc.data());
-      }
-    } catch (e) {
-      console.error("Error fetching user data:", e);
-    } finally {
-      setLoadingUser(false);
-    }
-  };
 
   const handleApproveClick = () => {
     setIsConfirmingApprove(true);
@@ -79,21 +62,6 @@ export default function WithdrawalDetailModal({
         withdrawal.amount,
       );
       onUpdate();
-      const successMessage = `Hello ${userData.name}\n\n Your Request to withdraw  ${withdrawal.amount.toString()} FCFA was successful. Thank you for trusting SHERE.`;
-      await navigator
-        .share({
-          title: "Successful Transaction.",
-          text: successMessage,
-          url: `${window.location.origin}`,
-        })
-        .then(() => {
-          onClose();
-        })
-        .catch((e) => {
-          console.error(e);
-          navigator.clipboard.writeText(successMessage);
-          onClose();
-        });
       onClose();
     } catch (e) {
       console.error(e);
@@ -109,23 +77,13 @@ export default function WithdrawalDetailModal({
 
     setProcessing(true);
     try {
-      await rejectWithdrawal(withdrawal.userId, withdrawal.id, reason);
+      await rejectWithdrawal(
+        withdrawal.userId,
+        withdrawal.id,
+        reason,
+        withdrawal.amount,
+      );
       onUpdate();
-      const rejectionMessage = `Hello ${userData.name}\n\n Your Request to Withdraw an Amount of ${withdrawal.amount.toString()} FCFA has failed. \n\n Reason: ${reason}`;
-      await navigator
-        .share({
-          title: "Failed Transaction.",
-          text: rejectionMessage,
-          url: `${window.location.origin}`,
-        })
-        .then(() => {
-          onClose();
-        })
-        .catch((e) => {
-          console.error(e);
-          navigator.clipboard.writeText(rejectionMessage);
-          onClose();
-        });
       onClose();
     } catch (e) {
       console.error(e);
@@ -215,21 +173,21 @@ export default function WithdrawalDetailModal({
                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Users size={12} /> User Live Status
                 </h4>
-                {loadingUser ? (
+                {!user.uid ? (
                   <div className="animate-pulse flex gap-4">
                     <div className="h-14 w-full bg-slate-800 rounded-xl"></div>
                     <div className="h-14 w-full bg-slate-800 rounded-xl"></div>
                   </div>
-                ) : userData ? (
+                ) : user ? (
                   <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-slate-900 rounded-xl border border-slate-800/80">
                       <p className="text-xs text-gray-500 mb-1">
                         Current Balance
                       </p>
                       <p
-                        className={`font-bold text-lg ${userData.balance < withdrawal.amount ? "text-red-400" : "text-green-400"}`}
+                        className={`font-bold text-lg ${user.balance < withdrawal.amount ? "text-red-400" : "text-green-400"}`}
                       >
-                        {userData.balance?.toLocaleString()}{" "}
+                        {user.balance?.toLocaleString()}{" "}
                         <span className="text-xs text-gray-600">FCFA</span>
                       </p>
                     </div>
@@ -239,9 +197,9 @@ export default function WithdrawalDetailModal({
                       </p>
                       <p
                         className="font-bold text-white truncate text-sm"
-                        title={userData.phoneAccountName}
+                        title={user.phoneAccountName}
                       >
-                        {userData.phoneAccountName || "Not Set"}
+                        {user.phoneAccountName || "Not Set"}
                       </p>
                     </div>
                     <div className="p-4 bg-slate-900 rounded-xl border border-slate-800/80 col-span-2">
@@ -249,7 +207,7 @@ export default function WithdrawalDetailModal({
                         User Profile Name
                       </p>
                       <p className="font-bold text-white text-sm">
-                        {userData.name || "Anonymous"}
+                        {user.name || "Anonymous"}
                       </p>
                     </div>
                   </div>
@@ -352,7 +310,7 @@ export default function WithdrawalDetailModal({
                         onClick={handleApproveClick}
                         disabled={
                           processing ||
-                          (userData && userData.balance < withdrawal.amount)
+                          (user && user.balance < withdrawal.amount)
                         }
                         className="flex-2 py-3.5 bg-linear-to-r from-blue-600 to-blue-500 text-white font-bold rounded-xl hover:from-blue-500 hover:to-blue-400 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
                       >

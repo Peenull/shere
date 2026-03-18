@@ -5,7 +5,6 @@ export interface Country {
   emoji: string;
   placeholder: string;
   expectedLength: number; // Expected length of the local number
-  currency: string; // ISO 4217 Currency Code
 }
 
 export const COUNTRIES: Country[] = [
@@ -16,7 +15,6 @@ export const COUNTRIES: Country[] = [
     emoji: "🇨🇲",
     placeholder: "6 50 12 34 56",
     expectedLength: 9,
-    currency: "XAF",
   },
   {
     name: "Nigeria",
@@ -25,7 +23,6 @@ export const COUNTRIES: Country[] = [
     emoji: "🇳🇬",
     placeholder: "801 234 5678",
     expectedLength: 10,
-    currency: "NGN",
   },
   {
     name: "Ghana",
@@ -34,7 +31,6 @@ export const COUNTRIES: Country[] = [
     emoji: "🇬🇭",
     placeholder: "20 123 4567",
     expectedLength: 9,
-    currency: "GHS",
   },
   {
     name: "Ivory Coast",
@@ -43,7 +39,6 @@ export const COUNTRIES: Country[] = [
     emoji: "🇨🇮",
     placeholder: "07 12 34 56 78",
     expectedLength: 10,
-    currency: "XOF",
   },
   {
     name: "Senegal",
@@ -52,7 +47,6 @@ export const COUNTRIES: Country[] = [
     emoji: "🇸🇳",
     placeholder: "77 123 45 67",
     expectedLength: 9,
-    currency: "XOF",
   },
   {
     name: "Benin",
@@ -61,7 +55,6 @@ export const COUNTRIES: Country[] = [
     emoji: "🇧🇯",
     placeholder: "97 12 34 56",
     expectedLength: 8,
-    currency: "XOF",
   },
   {
     name: "Burkina Faso",
@@ -70,7 +63,6 @@ export const COUNTRIES: Country[] = [
     emoji: "🇧🇫",
     placeholder: "70 12 34 56",
     expectedLength: 8,
-    currency: "XOF",
   },
   {
     name: "Guinea",
@@ -79,7 +71,6 @@ export const COUNTRIES: Country[] = [
     emoji: "🇬🇳",
     placeholder: "620 12 34 56",
     expectedLength: 9,
-    currency: "GNF",
   },
   {
     name: "Rwanda",
@@ -88,7 +79,6 @@ export const COUNTRIES: Country[] = [
     emoji: "🇷🇼",
     placeholder: "788 123 456",
     expectedLength: 9,
-    currency: "RWF",
   },
   {
     name: "Congo (Brazzaville)",
@@ -97,16 +87,14 @@ export const COUNTRIES: Country[] = [
     emoji: "🇨🇬",
     placeholder: "05 123 45 67",
     expectedLength: 9,
-    currency: "XAF",
   },
-   {
+  {
     name: "South Africa",
     code: "ZA",
     dialCode: "27",
     emoji: "🇿🇦",
     placeholder: "71 234 5678",
     expectedLength: 9,
-    currency: "ZAR",
   },
   {
     name: "Uganda",
@@ -115,6 +103,5 @@ export const COUNTRIES: Country[] = [
     emoji: "🇺🇬",
     placeholder: "701 234 567",
     expectedLength: 9,
-    currency: "UGX",
   },
 ];

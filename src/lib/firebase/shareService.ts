@@ -23,7 +23,9 @@ export interface SharePurchase {
   amount: number; // Price paid in FCFA
   percentage: number;
   status: "pending" | "completed" | "rejected";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dateRequested: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   completeDate?: any;
   rejectionReason: string;
 }
@@ -65,6 +67,7 @@ export const getUserSharePurchases = async (userId: string) => {
     );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (doc: any) =>
         ({
           id: doc.id,
@@ -79,10 +82,12 @@ export const getUserSharePurchases = async (userId: string) => {
 
 export const getSharePurchases = async (
   status: "pending" | "completed" | "rejected",
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lastDoc?: any,
   pageSize: number = 10,
 ) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const constraints: any[] = [where("status", "==", status)];
 
     // Match sorting of withdrawal system: pending/rejected ascending, completed descending
@@ -98,6 +103,7 @@ export const getSharePurchases = async (
     const snapshot = await getDocs(q);
 
     const purchases: SharePurchase[] = snapshot.docs.map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (doc: any) =>
         ({
           id: doc.id,
@@ -158,6 +164,7 @@ export const approveSharePurchase = async (
           const commission = amount * ((referrerData.share || 0) / 100);
           const updatedBalance = (referrerData.balance || 0) + commission;
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const updatePayload: any = { balance: updatedBalance };
 
           const alreadyInvited = (referrerData.invited || []).includes(userId);
@@ -170,6 +177,11 @@ export const approveSharePurchase = async (
       transaction.update(userRef, {
         share: currentShare + percentage,
         invested: currentInvested + amount,
+        message: {
+          text: `You have successfully bought shares of ${percentage}% for ${amount} FCFA`,
+          good: true,
+          transaction: true,
+        },
       });
 
       // Update purchase status
@@ -191,12 +203,22 @@ export const rejectSharePurchase = async (
   userId: string,
   purchaseId: string,
   reason: string,
+  percentage: number,
+  amount: number,
 ) => {
   try {
     const purchaseRef = doc(db, `users/${userId}/sharePurchases`, purchaseId);
+    const userRef = doc(db, "users", userId);
     await updateDoc(purchaseRef, {
       status: "rejected",
       rejectionReason: reason,
+    });
+    await updateDoc(userRef, {
+      message: {
+        text: `Your Request to buy ${percentage}% shares for ${amount} FCFA has Failed. Reason: ${reason}`,
+        good: false,
+        transaction: true,
+      },
     });
     return true;
   } catch (error) {
